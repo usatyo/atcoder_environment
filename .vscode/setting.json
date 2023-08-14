@@ -1,0 +1,34 @@
+{
+    "files.autoSave": "afterDelay",
+    "files.autoSaveDelay": 1000,
+    "files.trimTrailingWhitespace": true,
+    "files.insertFinalNewline": true,
+    "python.linting.lintOnSave": true,
+    "[python]": {
+        "editor.insertSpaces": true,
+        "editor.detectIndentation": true
+    },
+    "editor.tabSize": 4,
+    "python.venvPath": ".venv",
+    "python.pipenvPath": "/usr/local/bin/pipenv",
+    "python.linting.pylintEnabled": true,
+    "python.linting.pep8Enabled": false,
+    "python.linting.mypyEnabled": true,
+    "python.linting.flake8Enabled": true,
+    "python.linting.flake8Args": [
+        "--max-line-length=120",
+        "--max-complexity",
+        "20"
+    ],
+    "python.formatting.provider": "autopep8",
+    "python.formatting.autopep8Args": ["--aggressive", "--aggressive"],
+    "python.testing.unittestArgs": ["-v", "-s", ".", "-p", "*test.py"],
+    "python.testing.pytestEnabled": false,
+    "python.testing.nosetestsEnabled": false,
+    "python.testing.unittestEnabled": true,
+    "code-runner.runInTerminal": true,
+    "code-runner.executorMap": {
+        "cpp": "cd $dir && g++ -std=c++17 -I . -DLOCAL $fileName -o $fileNameWithoutExt"
+    },
+    "code-runner.ignoreSelection": true
+}

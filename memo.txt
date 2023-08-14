@@ -1,0 +1,23 @@
+20*20のsamplingする
+水源からダイクストラ
+マス目を書いてその線上のみ移動可にする
+
+斜め線を許可
+
+n = int(input())
+
+ans = []
+
+head = n
+
+for i in range(n // 2):
+    for j in range(n - i * 2 - 1):
+        ans.append(head)
+        ans.append(head - 1)
+    ans.append(head)
+    head -= 2
+
+if n % 2 == 1:
+    ans.append(1)
+
+print(*ans)

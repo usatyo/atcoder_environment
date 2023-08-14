@@ -1,0 +1,79 @@
+
+bisect
+  O(log(N))でソートされた配列にある要素を挿入できる位置を取得
+
+  bisect_right(a,x)
+  bisect_left(a,x)
+
+set
+  重複を削除した上で最小値をO(1)で取得、要素の挿入はO(log(N))
+
+defaultdict
+  初期値つき辞書
+
+隣接行列
+  二つの頂点間の辺の存在確認が容易
+
+隣接リスト
+  辿るときに便利
+
+sorted
+  リストをO(Nlog(N))でソート
+  a = sorted(a, key=lambda x: x[0])  
+  // キーの指定
+
+reversed
+  リストを逆順に、返り値はリストじゃない
+
+collectionsについて
+  https://qiita.com/bee2/items/4ab87d05cc03d53e19f9
+
+heapq
+  最小値の取り出し、要素の挿入がともにO(log(N))
+  https://qiita.com/ell/items/fe52a9eb9499b7060ed6
+
+  import heapq
+  heap = []
+  heapq.heappush(heap, 1)
+  heapq.heappop(heap)
+
+ord
+  ascii -> 数値
+
+chr
+  数値 -> ascii
+
+bit全探索
+  シフト演算子 i >> j (iをjビット右にシフト)を使う
+
+二分探索
+  最大値の最小化や最小値の最大化などに使える
+
+Unionfind
+  素集合を同じ根に属しているかで管理
+  分離はできない
+
+ワーシャルフロイド法
+  最短経路を始点、中継点、終点の三重ループで求める
+  グラフの動的計画法
+
+再帰の上限回数変更
+  import sys
+  sys.setrecursionlimit(1000000)
+
+suffix array
+  文字列の始点を変えたときの辞書順
+
+
+
+余事象
+逆からやってみる
+（場合の数問題で）小さいとこから構成していく
+i番目をiだけシフト
+サンプルで流れを確認
+制約をよく読む
+小さい具体例で試しつつ法則を見つける
+わからなければコピペでいい
+
+
+
