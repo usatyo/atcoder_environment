@@ -1,12 +1,7 @@
-import math
-from bisect import bisect_left, bisect_right
-from collections import defaultdict, deque
-from copy import deepcopy
-from heapq import heapify, heappop, heappush
 from itertools import combinations, permutations, product
 from math import ceil, gcd
 from string import ascii_lowercase, ascii_uppercase
-from sys import exit, setrecursionlimit
+from sys import setrecursionlimit
 
 # UnionFind
 from atcoder.dsu import DSU
@@ -23,3 +18,4 @@ from atcoder.segtree import SegTree
 from atcoder.string import suffix_array
 
 setrecursionlimit(10**7)
+standard_prime = 998244353

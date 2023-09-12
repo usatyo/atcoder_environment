@@ -1,23 +1,4 @@
-20*20のsamplingする
-水源からダイクストラ
-マス目を書いてその線上のみ移動可にする
+迷路は幅優先探索してグラフを作成
+作物は包含関係が大事
+作物を植えない通路を作る
 
-斜め線を許可
-
-n = int(input())
-
-ans = []
-
-head = n
-
-for i in range(n // 2):
-    for j in range(n - i * 2 - 1):
-        ans.append(head)
-        ans.append(head - 1)
-    ans.append(head)
-    head -= 2
-
-if n % 2 == 1:
-    ans.append(1)
-
-print(*ans)
