@@ -6,10 +6,10 @@
   "python.linting.lintOnSave": true,
   "python.pipenvPath": "/usr/local/bin/pipenv",
   "python.formatting.provider": "black",
+  "editor.tabSize": 4,
   "[python]": {
     "editor.insertSpaces": true,
-    "editor.detectIndentation": true,
-    "editor.tabSize": 4
+    "editor.detectIndentation": true
   },
   "[cpp]": {
     "editor.wordBasedSuggestions": false,
@@ -19,7 +19,8 @@
     "editor.defaultFormatter": "ms-vscode.cpptools",
   },
   "code-runner.executorMap": {
-    "cpp": "cd $dir && g++ -std=c++17 -I ./ac-library -DLOCAL $fileName -o main.out && ./main.out < input.txt"
+    "cpp": "cd $dir && g++ -std=c++17 -I ./ac-library -DLOCAL $fileName -o main.out && ./main.out < input.txt && ./main.out < input.txt > output_cpp.txt",
+    "python": "cd $dir && python3 $fileName < input.txt && python3 $fileName < input.txt > output_py.txt"
   },
   "files.associations": {
     "*.css": "tailwindcss",
