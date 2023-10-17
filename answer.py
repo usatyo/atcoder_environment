@@ -5,7 +5,7 @@ from statistics import mean, pvariance
 
 class Solver:
     def __init__(self, simulation, n, d, q, split, border):
-        self.DEBUG_MODE = True
+        self.DEBUG_MODE = False
         self.SIMU = simulation
 
         if self.SIMU:
@@ -26,9 +26,15 @@ class Solver:
             self.n, self.d, self.q = map(int, input().split())
             if self.DEBUG_MODE:
                 self.w = list(map(int, input().split()))
-            self.split = max(
-                2, min(self.n, round(2 ** ((self.q - 6 * self.d) / self.n)))
-            )
+            # if self.q / self.n >= 10:
+            #     self.split = self.n
+            # elif self.q / self.n >= 6:
+            #     self.split = self.n // 2
+            # elif self.q / self.n >= 4:
+            #     self.split = self.n // 3
+            # else:
+            #     self.split = 4
+            self.split = max(4, min(self.n, round(2 ** ((self.q - 10 * self.d) / self.n))))
             self.print("# split: ", self.split)
             self.border = 6
 
@@ -72,6 +78,7 @@ class Solver:
         self.rest -= 1
 
         self.print(len(l), len(r), *l, *r)
+        self.print("#c", *self.ans)
         res = input()
         if res == ">":
             return -1
@@ -178,33 +185,22 @@ class Solver:
     def pickup(self, group):
         l = list(self.dic[group])
         l.sort(key=lambda x: self.label[x] + random())
-        self.print("# pickup: ", *[str(val) + "," + str(self.label[val]) for val in l])
-        idx = int((len(l) - 1) * self.rate)
-        idx = max(0, idx)
-        self.print("# idx: ", idx)
+        idx = round(len(l) * self.rate)
+        idx = max(0, min(len(l) - 2, idx))
         return l[idx]
 
     def evaluate(self):
-        original = list(range(self.n))
-        shuffle(original)
         for i in range(self.n // self.split):
-            l = original[i * self.split: (i + 1) * self.split]
+            l = list(range(i * self.split, (i + 1) * self.split))
+            shuffle(l)
             res = self.quick_sort(l, True, self.n, 0, self.split, self.split)
             for j in range(len(res)):
                 self.label[res[j]] = j
-            self.print("# res: ", res)
-            self.print(
-                "# sorted: ", *[str(self.w[r]) + ", " + str(self.label[r]) for r in res]
-            )
 
-        l = original[self.n // self.split * self.split:]
-        res = self.quick_sort(l, True, self.n, 0, len(l), len(l))
-        for i in range(len(l)):
-            self.label[res[i]] = (self.split - len(l)) // 2 + i
+        for i in range(self.n % self.split):
+            self.label[self.n // self.split * self.split + i] = self.split // 2
 
         self.checkpoint = self.rest
-        for i in range(self.n):
-            print("# ", i, self.label[i])
 
     def swap(self):
         self.active = set(range(self.d))
@@ -220,7 +216,6 @@ class Solver:
                 continue
             target = self.pickup(b)
 
-            self.print("# label: ", self.label[target])
             self.dic[b].remove(target)
             self.dic[a].add(target)
             self.ans[target] = a
