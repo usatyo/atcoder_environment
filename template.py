@@ -1,5 +1,5 @@
 from itertools import combinations, permutations, product
-from math import ceil, gcd
+from math import ceil, gcd, lcm
 from string import ascii_lowercase, ascii_uppercase
 from sys import setrecursionlimit
 
@@ -19,3 +19,5 @@ from atcoder.string import suffix_array
 
 setrecursionlimit(10**7)
 standard_prime = 998244353
+
+# with ModContext(standard_prime):

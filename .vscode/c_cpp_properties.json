@@ -3,7 +3,8 @@
         {
             "name": "Mac",
             "includePath": [
-                "${workspaceFolder}/**"
+                "${workspaceFolder}/**",
+                "/opt/homebrew/Cellar/gcc/13.2.0/include/c++/13/aarch64-apple-darwin22/"
             ],
             "defines": [
                 "_DEBUG",
