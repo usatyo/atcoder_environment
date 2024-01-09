@@ -486,4 +486,11 @@ def convex_hull(points: list):
     return ans
 
 
+def catalan():
+    pass
+
+
+# fps: https://github.com/shakayami/ACL-for-python/blob/master/fps.py
+# wiki: https://github.com/shakayami/ACL-for-python/wiki/fps
+
 
