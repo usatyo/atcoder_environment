@@ -44,22 +44,6 @@ def primes(n):
     return ret
 
 
-def dp():
-    return 0
-
-
-def dijkstra():
-    return 0
-
-
-def all_bit(base, pow):
-    for i in range(base**pow):
-        for j in range(pow):
-            if i // (base**j) % base == 0:
-                print()
-    return 0
-
-
 def run_length(s):
     ret = []
     ret.append([s[0], 1])

@@ -135,21 +135,3 @@ def is_inside_polygon(ps, q):
         return 1
     else:
         return -1
-
-
-n = int(input())
-ps = []
-for _ in range(n):
-    x, y = map(int, input().split())
-    ps.append([x, y])
-
-q = int(input())
-
-for _ in range(q):
-    x, y = map(int, input().split())
-    if is_inside_polygon(ps, [x, y]) == 0:
-        print(1)
-    elif is_inside_polygon(ps, [x, y]) == 1:
-        print(2)
-    else:
-        print(0)

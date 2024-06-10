@@ -1,11 +1,15 @@
-from collections import defaultdict
 from heapq import heappop, heappush
 
 
 class Dijkstra:
-    def __init__(self) -> None:
-        """初期化"""
-        self.e = defaultdict(list)
+    def __init__(self, n) -> None:
+        """初期化
+
+        Args:
+            n (int): 頂点数
+        """
+        self.e = [[] for _ in range(n)]
+        self.n = n
 
     def add(self, u, v, d):
         """辺を追加
@@ -35,13 +39,13 @@ class Dijkstra:
             s (int): 始点
 
         Returns:
-            defaultdict(int): 始点から各点までの最短距離
+            int[]: 始点から各点までの最短距離
         """
-        d = defaultdict(lambda: float("inf"))
+        d = [float("inf")] * self.n
         d[s] = 0
         q = []
         heappush(q, (0, s))
-        v = defaultdict(bool)
+        v = [False] * self.n
         while len(q):
             k, u = heappop(q)
             if v[u]:
@@ -329,7 +333,7 @@ class SortedSet(Generic[T]):
         return ans
 
 
-from collections import deque
+from collections import defaultdict, deque
 
 
 class TopologicalSort:
@@ -486,11 +490,104 @@ def convex_hull(points: list):
     return ans
 
 
-def catalan():
-    pass
-
-
 # fps: https://github.com/shakayami/ACL-for-python/blob/master/fps.py
 # wiki: https://github.com/shakayami/ACL-for-python/wiki/fps
 
 
+# 関節点(Articulation Points)
+def get_articulation_points(G, N, start=0):
+    order = [None] * N
+    result = []
+    count = 0
+
+    def dfs(v, prev):
+        nonlocal count
+        r_min = order[v] = count  # 到達時にラベル
+        fcnt = 0
+        p_art = 0
+        count += 1
+        for w in G[v]:
+            if w == prev:
+                continue
+            if order[w] is None:
+                ret = dfs(w, v)
+                # 子の頂点が到達できたのが、自身のラベル以上の頂点のみ
+                # => 頂点vは関節点
+                p_art |= order[v] <= ret
+                r_min = min(r_min, ret)
+                fcnt += 1
+            else:
+                r_min = min(r_min, order[w])
+        p_art |= r_min == order[v] and len(G[v]) > 1
+        if (prev == -1 and fcnt > 1) or (prev != -1 and p_art):
+            # 頂点startの場合は、二箇所以上の子頂点を調べたら自身は関節点
+            result.append(v)
+        return r_min
+
+    dfs(start, -1)
+    return result
+
+
+# 全方位木DP
+class Rerooting:
+    """全方位木DP
+
+    Arge:
+        n: 頂点数
+        merge ( (any left, any right) => any ): 部分木のマージ時の操作
+        addNode ( (any value, int nodeId) => any ): 頂点での追加操作
+        e (any): 単位元
+    """
+
+    def __init__(self, n, merge, addNode, e) -> None:
+        self._n = n
+        self._merge = merge
+        self._addNode = addNode
+        self._e = e
+        self._adj = [[] for _ in range(n)]
+
+        self._childVal = defaultdict(lambda: e)
+
+    def add_edge(self, u, v):
+        self._adj[u].append(v)
+        self._adj[v].append(u)
+
+    def reroot(self):
+        parents = [-1] * self._n
+        order = []
+        stack = deque([0])
+        ret = [self._e] * self._n
+
+        # 行きがけ順
+        while stack:
+            target = stack.pop()
+            order.append(target)
+            for node in self._adj[target]:
+                if parents[target] == node:
+                    continue
+                stack.append(node)
+                parents[node] = target
+
+        # 帰りがけ順
+        for target in order[::-1]:
+            result = self._e
+            for node in self._adj[target]:
+                if parents[target] == node:
+                    continue
+                result = self._merge(result, self._childVal[(node, target)])
+            self._childVal[(target, parents[target])] = self._addNode(result, target)
+
+        for target in order:
+            accTail = [self._e]
+            for node in self._adj[target][::-1]:
+                accTail.append(self._merge(accTail[-1], self._childVal[(node, target)]))
+            accTail = accTail[::-1]
+            accHead = self._e
+            for i, node in enumerate(self._adj[target]):
+                result = self._addNode(self._merge(accHead, accTail[i + 1]), target)
+                self._childVal[(target, node)] = result
+                accHead = self._merge(accHead, self._childVal[(node, target)])
+
+            ret[target] = self._addNode(accHead, target)
+
+        return ret

@@ -3,20 +3,20 @@
   "files.autoSaveDelay": 1000,
   "files.trimTrailingWhitespace": true,
   "files.insertFinalNewline": true,
-  "python.linting.lintOnSave": true,
   "python.pipenvPath": "/usr/local/bin/pipenv",
-  "python.formatting.provider": "black",
   "editor.tabSize": 4,
   "[python]": {
     "editor.insertSpaces": true,
-    "editor.detectIndentation": true
+    "editor.detectIndentation": true,
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "ms-python.black-formatter"
   },
   "[cpp]": {
-    "editor.wordBasedSuggestions": false,
+    "editor.wordBasedSuggestions": "off",
     "editor.suggest.insertMode": "replace",
     "editor.semanticHighlighting.enabled": true,
     "editor.formatOnSave": true,
-    "editor.defaultFormatter": "ms-vscode.cpptools",
+    "editor.defaultFormatter": "ms-vscode.cpptools"
   },
   "code-runner.executorMap": {
     "cpp": "cd $dir && g++ -std=c++17 -I ./ac-library -DLOCAL $fileName -o main.out && ./main.out < input.txt && ./main.out < input.txt > output_cpp.txt",
