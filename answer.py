@@ -483,10 +483,39 @@ def intersection_circle(c1x, c1y, c1r, c2x, c2y, c2r):
     return p1, p2
 
 
-c1x, c1y, c1r = map(int, input().split())
-c2x, c2y, c2r = map(int, input().split())
+def tangent_circle(cx, cy, r, p):
+    """円と点の接線
 
-p1, p2 = intersection_circle(c1x, c1y, c1r, c2x, c2y, c2r)
+    Args:
+        cx (number): 円の中心のx座標
+        cy (number): 円の中心のy座標
+        r (number): 円の半径
+        p (list): 点の座標
+
+    Returns:
+        list<list>: 接点のリスト
+    """
+    d = distance([cx, cy], p)
+    if d < r:
+        return []
+    h = (d**2 - r**2) ** 0.5
+    e = [(p[0] - cx) / d, (p[1] - cy) / d]
+    n = [-1 * (p[1] - cy) / d, (p[0] - cx) / d]
+    q1 = [
+        cx + e[0] * r * r / d + n[0] * r * h / d,
+        cy + e[1] * r * r / d + n[1] * r * h / d,
+    ]
+    q2 = [
+        cx + e[0] * r * r / d - n[0] * r * h / d,
+        cy + e[1] * r * r / d - n[1] * r * h / d,
+    ]
+    return q1, q2
+
+
+px, py = map(int, input().split())
+cx, cy, r = map(int, input().split())
+p1, p2 = tangent_circle(cx, cy, r, [px, py])
 if p2 < p1:
     p1, p2 = p2, p1
-print(f"{p1[0]:.10f}", f"{p1[1]:.10f}", f"{p2[0]:.10f}", f"{p2[1]:.10f}")
+print(f"{p1[0]:.10f} {p1[1]:.10f}")
+print(f"{p2[0]:.10f} {p2[1]:.10f}")
