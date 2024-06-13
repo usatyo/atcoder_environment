@@ -455,3 +455,38 @@ def intersection_circle_line(cx, cy, r, p1, p2):
     q1 = [cx + n[0] + e[0], cy + n[1] + e[1]]
     q2 = [cx + n[0] - e[0], cy + n[1] - e[1]]
     return q1, q2
+
+
+def intersection_circle(c1x, c1y, c1r, c2x, c2y, c2r):
+    """2つの円の交点
+
+    Args:
+        c1x (number): 円1の中心のx座標
+        c1y (number): 円1の中心のy座標
+        c1r (number): 円1の半径
+        c2x (number): 円2の中心のx座標
+        c2y (number): 円2の中心のy座標
+        c2r (number): 円2の半径
+
+    Returns:
+        list<list>: 交点の座標のリスト
+    """
+    d = distance([c1x, c1y], [c2x, c2y])
+    if d > c1r + c2r or d < abs(c1r - c2r):
+        return []
+    a = (c1r**2 - c2r**2 + d**2) / (2 * d)
+    h = (c1r**2 - a**2) ** 0.5
+    x0 = c1x + a * (c2x - c1x) / d
+    y0 = c1y + a * (c2y - c1y) / d
+    p1 = [x0 + h * (c2y - c1y) / d, y0 - h * (c2x - c1x) / d]
+    p2 = [x0 - h * (c2y - c1y) / d, y0 + h * (c2x - c1x) / d]
+    return p1, p2
+
+
+c1x, c1y, c1r = map(int, input().split())
+c2x, c2y, c2r = map(int, input().split())
+
+p1, p2 = intersection_circle(c1x, c1y, c1r, c2x, c2y, c2r)
+if p2 < p1:
+    p1, p2 = p2, p1
+print(f"{p1[0]:.10f}", f"{p1[1]:.10f}", f"{p2[0]:.10f}", f"{p2[1]:.10f}")
