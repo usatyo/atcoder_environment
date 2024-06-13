@@ -12,6 +12,7 @@
 
 
 from collections import deque
+from math import atan2
 
 
 def dot(v, w):
@@ -73,85 +74,83 @@ def reflect(v, w):
     return [2 * p[0] - w[0], 2 * p[1] - w[1]]
 
 
-def counter_clockwise(v, w, o=[0, 0]):
-    """v を基準とした w の回転方向判定
+def counter_clockwise(p1, p2, p3):
+    """3点 p1, p2, p3 の回転方向判定
 
     Args:
-        v (list): ベクトル1
-        w (list): ベクトル2
-        o (list, optional): 原点. Defaults to [0, 0].
+        p1 (list): 点1
+        p2 (list): 点2
+        p3 (list): 点3
 
     Returns:
         number: 反時計回り:1, 時計回り:-1, 直線上:0
     """
-    v = [v[0] - o[0], v[1] - o[1]]
-    w = [w[0] - o[0], w[1] - o[1]]
-    if cross(v, w) > 0:
+    p2 = [p2[0] - p1[0], p2[1] - p1[1]]
+    p3 = [p3[0] - p1[0], p3[1] - p1[1]]
+    if cross(p2, p3) > 0:
         return 1
-    elif cross(v, w) < 0:
+    elif cross(p2, p3) < 0:
         return -1
     else:
         return 0
 
 
-# w が v の線分上にあるか判定
-# 整数のみ使用可能
-def on_segment(v, w, o=[0, 0]):
+def on_segment(p, q1, q2):
     """線分上の判定
 
     Args:
-        v (list): 線分を表すベクトル
-        w (list): 判定する点
-        o (list, optional): 原点. Defaults to [0, 0].
+        p (list): 点の座標
+        q1 (list): 線分の端点1
+        q2 (list): 線分の端点2
 
     Returns:
-        bool: w が v の線分上にある場合 True
+        bool: p が q1-q2 の線分上にある場合 True
     """
-    v = [v[0] - o[0], v[1] - o[1]]
-    w = [w[0] - o[0], w[1] - o[1]]
-    if counter_clockwise(v, w) != 0:
+    if counter_clockwise(q1, q2, p) != 0:
         return False
+    v = [q2[0] - q1[0], q2[1] - q1[1]]
+    w = [p[0] - q1[0], p[1] - q1[1]]
     return 0 <= dot(v, w) <= dot(v, v)
 
 
-def intersect_segment(p0, p1, q0, q1):
+def intersect_segment(p1, p2, q1, q2):
     """線分の交差判定
 
     Args:
-        p0 (list): 線分1の始点
-        p1 (list): 線分1の終点
-        q0 (list): 線分2の始点
-        q1 (list): 線分2の終点
+        p1 (list): 線分1の始点
+        p2 (list): 線分1の終点
+        q1 (list): 線分2の始点
+        q2 (list): 線分2の終点
 
     Returns:
         bool: 線分1と線分2が交差している場合 True
     """
     return (
-        counter_clockwise(p0, q1, q0) * counter_clockwise(q1, p1, q0) > 0
-        and counter_clockwise(q0, p1, p0) * counter_clockwise(p1, q1, p0) > 0
-        or on_segment(p1, q0, p0)
-        or on_segment(p1, q1, p0)
-        or on_segment(q1, p0, q0)
-        or on_segment(q1, p1, q0)
+        counter_clockwise(q1, q2, p1) * counter_clockwise(q1, q2, p2) < 0
+        and counter_clockwise(p1, p2, q1) * counter_clockwise(p1, p2, q2) < 0
+        or on_segment(q1, p1, p2)
+        or on_segment(q2, p1, p2)
+        or on_segment(p1, q1, q2)
+        or on_segment(p2, q1, q2)
     )
 
 
-def intersection_point(p0, p1, q0, q1):
+def intersection_point(p1, p2, q1, q2):
     """線分の交点
 
     Args:
-        p0 (list): 線分1の始点
-        p1 (list): 線分1の終点
-        q0 (list): 線分2の始点
-        q1 (list): 線分2の終点
+        p1 (list): 線分1の始点
+        p2 (list): 線分1の終点
+        q1 (list): 線分2の始点
+        q2 (list): 線分2の終点
 
     Returns:
         list: 交点の座標
     """
-    t = cross(q0, p1, p0) / cross(
-        [p1[0] - p0[0], p1[1] - p0[1]], [q1[0] - q0[0], q1[1] - q0[1]]
+    t = cross(q1, p2, p1) / cross(
+        [p2[0] - p1[0], p2[1] - p1[1]], [q2[0] - q1[0], q2[1] - q1[1]]
     )
-    return [q0[0] + t * (q1[0] - q0[0]), q0[1] + t * (q1[1] - q0[1])]
+    return [q1[0] + t * (q2[0] - q1[0]), q1[1] + t * (q2[1] - q1[1])]
 
 
 def distance(p, q):
@@ -167,46 +166,60 @@ def distance(p, q):
     return ((p[0] - q[0]) ** 2 + (p[1] - q[1]) ** 2) ** 0.5
 
 
-def distance_point_segment(p, q0, q1):
+def distance_point_segment(p, q1, q2):
     """点と線分の距離
 
     Args:
         p (list): 点の座標
-        q0 (list): 線分の端点1
-        q1 (list): 線分の端点2
+        q1 (list): 線分の端点1
+        q2 (list): 線分の端点2
 
     Returns:
         number: 点と線分の距離
     """
-    pj = project(q1, p, q0)
-    if distance(pj, q0) < distance(q0, q1) and distance(pj, q1) < distance(q0, q1):
-        return abs(cross(q1, p, q0) / distance(q0, q1))
+    pj = project(q1, p, q2)
+    if distance(pj, q1) < distance(q1, q2) and distance(pj, q2) < distance(q1, q2):
+        return abs(cross(q2, p, q1) / distance(q1, q2))
     else:
         return min(
-            distance(p, q0),
             distance(p, q1),
+            distance(p, q2),
         )
 
 
-def distance_segment(p0, p1, q0, q1):
+def distance_point_line(p, q1, q2):
+    """点と直線の距離
+
+    Args:
+        p (list): 点の座標
+        q1 (list): 直線の端点1
+        q2 (list): 直線の端点2
+
+    Returns:
+        number: 点と直線の距離
+    """
+    return abs(cross(q2, p, q1) / distance(q1, q2))
+
+
+def distance_segment(p1, p2, q1, q2):
     """線分と線分の距離
 
     Args:
-        p0 (list): 線分1の始点
-        p1 (list): 線分1の終点
-        q0 (list): 線分2の始点
-        q1 (list): 線分2の終点
+        p1 (list): 線分1の始点
+        p2 (list): 線分1の終点
+        q1 (list): 線分2の始点
+        q2 (list): 線分2の終点
 
     Returns:
         number: 線分1と線分2の距離
     """
-    if intersect_segment(p0, p1, q0, q1):
+    if intersect_segment(p1, p2, q1, q2):
         return 0
     return min(
-        distance_point_segment(p0, q0, q1),
-        distance_point_segment(p1, q0, q1),
-        distance_point_segment(q0, p0, p1),
-        distance_point_segment(q1, p0, p1),
+        distance_point_segment(p1, q1, q2),
+        distance_point_segment(p2, q1, q2),
+        distance_point_segment(q1, p1, p2),
+        distance_point_segment(q2, p1, p2),
     )
 
 
@@ -256,7 +269,7 @@ def is_inside_polygon(ps, q):
     q0 = [q[0] + 99989, q[1] + 99991]
     count = 0
     for i in range(n):
-        if on_segment(ps[i], q, ps[(i + 1) % n]):
+        if on_segment(q, ps[i], ps[(i + 1) % n]):
             return 0
         if intersect_segment(q, q0, ps[i], ps[(i + 1) % n]):
             count += 1
@@ -365,23 +378,23 @@ def diameter_convex_polygon(ps):
     return res
 
 
-def incenter(p0, p1, p2):
+def incenter(p1, p2, p3):
     """三角形の内心
 
     Args:
-        p0 (list): 頂点1
-        p1 (list): 頂点2
-        p2 (list): 頂点3
+        p1 (list): 頂点1
+        p2 (list): 頂点2
+        p3 (list): 頂点3
 
     Returns:
         list: 内心のx座標、内心のy座標、内接円の半径を順に返す
     """
-    a = distance(p1, p2)
-    b = distance(p2, p0)
-    c = distance(p0, p1)
-    x = (a * p0[0] + b * p1[0] + c * p2[0]) / (a + b + c)
-    y = (a * p0[1] + b * p1[1] + c * p2[1]) / (a + b + c)
-    r = area_polygon([p0, p1, p2]) * 2 / (a + b + c)
+    a = distance(p2, p3)
+    b = distance(p3, p1)
+    c = distance(p1, p2)
+    x = (a * p1[0] + b * p2[0] + c * p3[0]) / (a + b + c)
+    y = (a * p1[1] + b * p2[1] + c * p3[1]) / (a + b + c)
+    r = area_polygon([p1, p2, p3]) * 2 / (a + b + c)
     return x, y, r
 
 
@@ -413,3 +426,32 @@ def curcumcenter(p1, p2, p3):
     y /= det
     r = ((x - p1[0]) ** 2 + (y - p1[1]) ** 2) ** 0.5
     return x, y, r
+
+
+def intersection_circle_line(cx, cy, r, p1, p2):
+    """円と直線の交点
+
+    Args:
+        cx (number): 円の中心のx座標
+        cy (number): 円の中心のy座標
+        r (number): 円の半径
+        p1 (list): 直線の端点1
+        p2 (list): 直線の端点2
+
+    Returns:
+        list<list>: 交点の座標のリスト
+    """
+    d = distance_point_line([cx, cy], p1, p2)
+    h = (r**2 - d**2) ** 0.5
+    if d > r:
+        return []
+    n = [0, 0]
+    if counter_clockwise(p1, p2, [cx, cy]) >= 0:
+        n = [p2[1] - p1[1], -1 * (p2[0] - p1[0])]
+    else:
+        n = [-1 * (p2[1] - p1[1]), p2[0] - p1[0]]
+    n = [n[0] * d / distance(p1, p2), n[1] * d / distance(p1, p2)]
+    e = [(p2[0] - p1[0]) * h / distance(p1, p2), (p2[1] - p1[1]) * h / distance(p1, p2)]
+    q1 = [cx + n[0] + e[0], cy + n[1] + e[1]]
+    q2 = [cx + n[0] - e[0], cy + n[1] - e[1]]
+    return q1, q2
