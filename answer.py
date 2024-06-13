@@ -12,7 +12,12 @@
 
 
 from collections import deque
-from math import atan2
+from math import sqrt
+from os import close
+from sys import setrecursionlimit
+
+INF = 10**9
+setrecursionlimit(10**7)
 
 
 def dot(v, w):
@@ -499,6 +504,32 @@ def tangent_circle(cx, cy, r, p):
     if d < r:
         return []
     h = (d**2 - r**2) ** 0.5
+    x0 = cx + (p[0] - cx) * r / d
+    y0 = cy + (p[1] - cy) * r / d
+    n = [p[1] - cy, cx - p[0]]
+    n = [n[0] * h / d, n[1] * h / d]
+    e = [(p[0] - cx) * h / d, (p[1] - cy) * h / d]
+    q1 = [x0 + n[0] + e[0], y0 + n[1] + e[1]]
+    q2 = [x0 + n[0] - e[0], y0 + n[1] - e[1]]
+    return q1, q2
+
+
+def tangent_circle(cx, cy, r, p):
+    """ある点を通る接線
+
+    Args:
+        cx (number): 円の中心のx座標
+        cy (number): 円の中心のy座標
+        r (number): 円の半径
+        p (list): 点の座標
+
+    Returns:
+        list<list>: 接点のリスト
+    """
+    d = distance([cx, cy], p)
+    if d < r:
+        return []
+    h = (d**2 - r**2) ** 0.5
     e = [(p[0] - cx) / d, (p[1] - cy) / d]
     n = [-1 * (p[1] - cy) / d, (p[0] - cx) / d]
     q1 = [
@@ -512,10 +543,68 @@ def tangent_circle(cx, cy, r, p):
     return q1, q2
 
 
-px, py = map(int, input().split())
-cx, cy, r = map(int, input().split())
-p1, p2 = tangent_circle(cx, cy, r, [px, py])
-if p2 < p1:
-    p1, p2 = p2, p1
-print(f"{p1[0]:.10f} {p1[1]:.10f}")
-print(f"{p2[0]:.10f} {p2[1]:.10f}")
+# cp_rec - 再帰用関数
+# 入力: 配列と区間
+# 出力: 距離と区間内の要素をY座標でソートした配列
+def cp_rec(ps, i, n):
+    if n <= 1:
+        return INF, [ps[i]]
+    m = n // 2
+    x = ps[i + m][0]  # 半分に分割した境界のX座標
+    # 配列を半分に分割して計算
+    d1, qs1 = cp_rec(ps, i, m)
+    d2, qs2 = cp_rec(ps, i + m, n - m)
+    d = min(d1, d2)
+    # Y座標が小さい順にmergeする
+    qs = [None] * n
+    s = t = idx = 0
+    while s < m and t < n - m:
+        if qs1[s][1] < qs2[t][1]:
+            qs[idx] = qs1[s]
+            s += 1
+        else:
+            qs[idx] = qs2[t]
+            t += 1
+        idx += 1
+    while s < m:
+        qs[idx] = qs1[s]
+        s += 1
+        idx += 1
+    while t < n - m:
+        qs[idx] = qs2[t]
+        t += 1
+        idx += 1
+    # 境界のX座標x(=ps[i+m][0])から距離がd以下のものについて距離を計算していく
+    # bは境界のX座標から距離d以下のものを集めたもの
+    b = []
+    for i in range(n):
+        ax, ay = q = qs[i]
+        if abs(ax - x) >= d:
+            continue
+        # Y座標について、qs[i]から距離がd以下のj(<i)について計算していく
+        for j in range(len(b) - 1, -1, -1):
+            dx = ax - b[j][0]
+            dy = ay - b[j][1]
+            if dy >= d:
+                break
+            d = min(d, sqrt(dx**2 + dy**2))
+        b.append(q)
+    return d, qs
+
+
+# ps: ソートした二次元座標のlist
+def closest_pair(ps):
+    n = len(ps)
+    return cp_rec(ps, 0, n)[0]
+
+
+n = int(input())
+ps = []
+
+for _ in range(n):
+    x, y = map(float, input().split())
+    ps.append([x, y])
+
+ps.sort()
+d = closest_pair(ps)
+print(f"{d:.10f}")
