@@ -3,6 +3,7 @@ python3 generator.py
 while [ true ]
 do
 python3 generator.py
+echo "generated"
 ANSWER=`python3 answer.py < input.txt`
 # echo "\nreal answer"
 HONEST=`python3 honesty.py < input.txt`

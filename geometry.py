@@ -13,6 +13,7 @@
 
 from collections import deque
 from math import sqrt
+from os import close
 from sys import setrecursionlimit
 
 INF = 10**9
@@ -243,6 +244,19 @@ def area_polygon(ps):
     return abs(s) / 2
 
 
+def common_polygon(ps1, ps2):
+    """多角形の共通部分(凹凸問わず)
+
+    Args:
+        ps1 (list<list>): 多角形1の頂点のリスト
+        ps2 (list<list>): 多角形2の頂点のリスト
+
+    Returns:
+        list<list<list>>: 共通部分の多角形のリスト
+    """
+    pass
+
+
 def is_convex_polygon(ps):
     """凸多角形判定
 
@@ -270,7 +284,17 @@ def is_inside_polygon(ps, q):
         number: 内部:1, 外部:-1, 辺上:0
     """
     n = len(ps)
-    q0 = [q[0] + 99989, q[1] + 99991]
+    if n == 1:
+        if q == ps[0]:
+            return 0
+        else:
+            return -1
+    if n == 2:
+        if on_segment(q, ps[0], ps[1]):
+            return 0
+        else:
+            return -1
+    q0 = [q[0] + 4735706939, q[1] + 1929495389]
     count = 0
     for i in range(n):
         if on_segment(q, ps[i], ps[(i + 1) % n]):
@@ -591,7 +615,15 @@ def cp_rec(ps, i, n):
     return d, qs
 
 
-# ps: ソートした二次元座標のlist
 def closest_pair(ps):
+    """最近点対
+
+    Args:
+        ps (list): 点の座標のリスト
+
+    Returns:
+        number: 最近点対の距離
+    """
+    ps.sort()
     n = len(ps)
     return cp_rec(ps, 0, n)[0]

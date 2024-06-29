@@ -1,50 +1,26 @@
-t = int(input())
-for _ in range(t):
-    n = int(input())
-    edges = [[] for _ in range(n)]
-    for _ in range(n - 1):
-        a, b = map(int, input().split())
-        a -= 1
-        b -= 1
-        edges[a].append(b)
-        edges[b].append(a)
-    s = input()
+h, w, k = map(int, input().split())
+a = list(map(int, input().split()))
+b = list(map(int, input().split()))
 
-    ans = [-1] * n
-    flag = True
-    bridge = []
+if (sum(a) - sum(b)) % k != 0:
+    print(-1)
+    exit()
 
-    for i in range(n):
-        if len(edges[i]) >= 2:
-            bridge.append(i)
-            continue
-        node = edges[i][0]
-        if s[i] == "B" and ans[node] == 1:
-            flag = False
-        if s[i] == "W" and ans[node] == 0:
-            flag = False
-        if s[i] == "B":
-            ans[node] = 0
-        else:
-            ans[node] = 1
+ans = 0
 
-    for i in bridge:
-        count = 0
-        for node in edges[i]:
-            if s[i] == "B" and ans[node] == 1:
-                count += 1
-                continue
-            if s[i] == "W" and ans[node] == 0:
-                count += 1
-                continue
-            if s[i] == "B":
-                ans[node] = 0
-            else:
-                ans[node] = 1
-        if count > len(edges[i]) // 2:
-            flag = False
+for bit in range(k ** (h * w)):
+    row = [0] * h
+    col = [0] * w
+    val = 0
+    for i in range(h):
+        for j in range(w):
+            x = bit // (k ** (i * w + j)) % k
+            row[i] += x
+            col[j] += x
+            row[i] %= k
+            col[j] %= k
+            val += x
+    if row == a and col == b:
+        ans = max(ans, val)
 
-    if not flag:
-        print(-1)
-    else:
-        print(*["B" if x == 0 else "W" for x in ans], sep="")
+print(ans)
