@@ -1,26 +1,29 @@
-h, w, k = map(int, input().split())
-a = list(map(int, input().split()))
-b = list(map(int, input().split()))
+t = int(input())
 
-if (sum(a) - sum(b)) % k != 0:
-    print(-1)
-    exit()
+for _ in range(t):
+    n = int(input())
+    p = list(map(int, input().split()))
+    ans = []
 
-ans = 0
+    for i in range(n - 1):
+        if p[i] == i + 1:
+            continue
+        idx = p.index(i + 1)
+        if (idx + i) & 1:
+            for x in range(idx - 1, i - 1, -1):
+                ans.append(x + 1)
+        else:
+            ans.append(i + 1)
+            p[i], p[i + 1] = p[i + 1], p[i]
+            for x in range(idx - 1, i - 1, -1):
+                ans.append(x + 1)
+        p = p[:i] + [i + 1] + p[i:idx] + p[idx + 1 :]
 
-for bit in range(k ** (h * w)):
-    row = [0] * h
-    col = [0] * w
-    val = 0
-    for i in range(h):
-        for j in range(w):
-            x = bit // (k ** (i * w + j)) % k
-            row[i] += x
-            col[j] += x
-            row[i] %= k
-            col[j] %= k
-            val += x
-    if row == a and col == b:
-        ans = max(ans, val)
+    print(len(ans))
+    print(*ans)
 
-print(ans)
+    if len(ans) > n**2:
+        print("over length")
+    for i in range(len(ans)):
+        if (ans[i] + i) & 1:
+            print("digit rule broken")
