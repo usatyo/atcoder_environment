@@ -6,11 +6,11 @@ import unittest
 
 
 class Test(unittest.TestCase):
-    def test_single_case(self):
+    def _test_single_case(self):
         gen = generator()
         gen.generate()
         file = open("input.txt", "r")
-        self.assertEqual(main(file.readline), honesty())
+        self.assertEqual(main(lambda: file.readline().rstrip()), honesty())
         file.close()
 
     def test_multiple_cases(self):
@@ -18,7 +18,7 @@ class Test(unittest.TestCase):
         for _ in range(10**2):
             gen.generate()
             file = open("input.txt", "r")
-            self.assertEqual(main(file.readline), honesty())
+            self.assertEqual(main(lambda: file.readline().rstrip()), honesty())
             file.close()
 
     def _test_satisfy_conditions(self):
@@ -28,10 +28,10 @@ class Test(unittest.TestCase):
             file = open("input.txt", "r")
 
             # edit here
-            self.assertTrue(main(file.readline) == 0)
+            self.assertTrue(main(lambda: file.readline().rstrip()) == 0)
 
             file.close()
 
 
 if __name__ == "__main__":
-    unittest.main()
+    unittest.main(warnings="ignore", verbosity=2)

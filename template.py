@@ -58,7 +58,8 @@ standard_prime = 998244353
 
 
 def main(input):
-    return ["001", "1", "00001"]
+    ans = 0
+    return ans
 
 
 def _format(ans):
@@ -74,6 +75,6 @@ def _format(ans):
 
 
 if __name__ == "__main__":
-    ans = main(stdin.readline)
+    ans = main(lambda: stdin.readline().rstrip())
     ans = _format(ans)
     print(ans)

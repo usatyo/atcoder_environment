@@ -2,23 +2,9 @@ from sys import stdin
 
 
 def main(input):
-    hand = ["R", "P", "S"]
+    ans = 0
 
-    n = int(input())
-    s = [hand.index(x) for x in input().rstrip()]
-
-    dp = [[0, 0, 0] for _ in range(n + 1)]
-
-    for i in range(n):
-        for j in range(3):
-            if (s[i] - j) % 3 == 1:
-                dp[i + 1][j] = -(10**6)
-            elif (s[i] - j) % 3 == 2:
-                dp[i + 1][j] = max(dp[i][(j + 1) % 3], dp[i][(j + 2) % 3]) + 1
-            else:
-                dp[i + 1][j] = max(dp[i][(j + 1) % 3], dp[i][(j + 2) % 3])
-
-    return max(dp[n])
+    return ans
 
 
 def _format(ans):
@@ -34,6 +20,6 @@ def _format(ans):
 
 
 if __name__ == "__main__":
-    ans = main(stdin.readline)
+    ans = main(lambda: stdin.readline().rstrip())
     ans = _format(ans)
     print(ans)

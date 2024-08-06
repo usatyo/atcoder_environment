@@ -1,30 +1,18 @@
-from itertools import product
-from sys import stdin
-
-
 def main(input):
     n = int(input())
-    s = input().rstrip()
-    hand = ["RPS".index(x) for x in s]
+    a = list(map(int, input().split()))
     ans = 0
 
-    for p in product((0, 1, 2), repeat=n):
-        for i in range(n - 1):
-            if p[i] == p[i + 1]:
-                break
-        else:
+    for i in range(n):
+        for j in range(i + 1, n):
             val = 0
-            for i in range(n):
-                if (p[i] - hand[i]) % 3 == 1:
-                    val += 1
-                elif (p[i] - hand[i]) % 3 == 2:
-                    break
-            else:
-                ans = max(ans, val)
+            for k in range(i, j + 1):
+                val ^= a[k]
+            ans += val
 
     return ans
 
 
 def honesty():
     file = open("input.txt", "r")
-    return main(file.readline)
+    return main(lambda: file.readline().rstrip())

@@ -4,10 +4,10 @@ from random import randint, shuffle
 class generator:
     def generate(self):
         file = open("input.txt", "w")
-        n = randint(1, 10)
-        s = "".join(["R", "P", "S"][randint(0, 2)] for _ in range(n))
+        n = randint(1, 100)
+        a = [randint(1, 100) for _ in range(n)]
         file.write(f"{n}\n")
-        file.write(s + "\n")
+        file.write(" ".join(map(str, a)) + "\n")
         file.close()
 
     def _random_tree(self):
