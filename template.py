@@ -58,14 +58,22 @@ standard_prime = 998244353
 
 
 def main(input):
-    return 0
+    return ["001", "1", "00001"]
+
+
+def _format(ans):
+    if type(ans) == str or type(ans) == int or type(ans) == float:
+        return str(ans)
+    elif type(ans) == list or type(ans) == tuple:
+        if type(ans[0]) == list or type(ans[0]) == tuple:
+            return "\n".join([(" ".join([str(x) for x in a])) for a in ans])
+        else:
+            return "\n".join(ans)
+    else:
+        raise TypeError("Return type is not supported.")
 
 
 if __name__ == "__main__":
     ans = main(stdin.readline)
-    if type(ans) == str or type(ans) == int:
-        print(ans)
-    elif type(ans) == list or type(ans) == tuple:
-        print(*ans, sep="\n")
-    else:
-        raise TypeError("Return type is not supported.")
+    ans = _format(ans)
+    print(ans)

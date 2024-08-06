@@ -1,25 +1,37 @@
 from random import randint
 from answer import main
+from honesty import honesty
+from generator import generator
 import unittest
-
-from honesty import main as honesty
 
 
 class Test(unittest.TestCase):
-    def _generate_input(self):
-        file = open("input.txt", "w")
-        n = randint(1, 10**5)
-        m = randint(1, 10**5)
-        file.write(f"{n} {m}\n")
-        file.close()
-
     def test_single_case(self):
-        self._generate_input()
+        gen = generator()
+        gen.generate()
         file = open("input.txt", "r")
-        self.assertEqual(main(file.readline), honesty(file.readline))
+        self.assertEqual(main(file.readline), honesty())
         file.close()
 
+    def test_multiple_cases(self):
+        gen = generator()
+        for _ in range(10**2):
+            gen.generate()
+            file = open("input.txt", "r")
+            self.assertEqual(main(file.readline), honesty())
+            file.close()
+
+    def _test_satisfy_conditions(self):
+        gen = generator()
+        for _ in range(10**2):
+            gen.generate()
+            file = open("input.txt", "r")
+
+            # edit here
+            self.assertTrue(main(file.readline) == 0)
+
+            file.close()
 
 
-
-unittest.main()
+if __name__ == "__main__":
+    unittest.main()
