@@ -2,7 +2,7 @@ from sys import stdin
 
 
 def main(input):
-    ans = 0
+    ans = input()
 
     return ans
 

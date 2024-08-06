@@ -5,6 +5,9 @@ from generator import generator
 import unittest
 
 
+LOOP = 100
+
+
 class Test(unittest.TestCase):
     def _test_single_case(self):
         gen = generator()
@@ -15,7 +18,7 @@ class Test(unittest.TestCase):
 
     def test_multiple_cases(self):
         gen = generator()
-        for _ in range(10**2):
+        for _ in range(LOOP):
             gen.generate()
             file = open("input.txt", "r")
             self.assertEqual(main(lambda: file.readline().rstrip()), honesty())
@@ -23,7 +26,7 @@ class Test(unittest.TestCase):
 
     def _test_satisfy_conditions(self):
         gen = generator()
-        for _ in range(10**2):
+        for _ in range(LOOP):
             gen.generate()
             file = open("input.txt", "r")
 
