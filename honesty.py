@@ -1,6 +1,9 @@
+from itertools import product
+from atcoder.dsu import DSU
+
+
 def main(input):
-    ans = input()
-    return ans
+    return
 
 
 def honesty():

@@ -16,7 +16,7 @@ class Test(unittest.TestCase):
         self.assertEqual(main(lambda: file.readline().rstrip()), honesty())
         file.close()
 
-    def test_multiple_cases(self):
+    def _test_multiple_cases(self):
         gen = generator()
         for _ in range(LOOP):
             gen.generate()
@@ -24,14 +24,14 @@ class Test(unittest.TestCase):
             self.assertEqual(main(lambda: file.readline().rstrip()), honesty())
             file.close()
 
-    def _test_satisfy_conditions(self):
+    def test_satisfy_conditions(self):
         gen = generator()
         for _ in range(LOOP):
             gen.generate()
             file = open("input.txt", "r")
 
             # edit here
-            self.assertTrue(main(lambda: file.readline().rstrip()) == 0)
+            n, k, *ans = main(lambda: file.readline().rstrip())
 
             file.close()
 
