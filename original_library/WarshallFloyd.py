@@ -1,5 +1,5 @@
 class WarshallFloyd:
-    """ワーシャルフロイド法 O(V^3)"""
+    """ワーシャルフロイド法. O(V^3)"""
 
     def __init__(self, N):
         """初期化

@@ -1,5 +1,5 @@
 def factorization(n):
-    """n を素因数分解
+    """n を素因数分解. O(sqrt n)
 
     Args:
         n (int): 素因数分解の対象
@@ -10,7 +10,7 @@ def factorization(n):
 
     if n == 1:
         return []
-    
+
     arr = []
     temp = n
     for i in range(2, int(-(-(n**0.5) // 1)) + 1):

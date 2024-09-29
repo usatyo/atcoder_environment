@@ -3,6 +3,14 @@ from collections import deque
 
 class LCA:
     def __init__(self, n, adj, root=0, max_bit=60) -> None:
+        """初期化
+
+        Args:
+            n (int): 頂点数
+            adj (list<int>): 隣接リスト
+            root (int, optional): 木の root. Defaults to 0.
+            max_bit (int, optional): 頂点数の最大ビット. Defaults to 60.
+        """
         self.n = n
         self.max_bit = max_bit
         self.adj = adj
@@ -30,6 +38,15 @@ class LCA:
                 q.append(u)
 
     def query(self, u, v):
+        """u, v の最小共通祖先(LCA)を返す. O(log N)
+
+        Args:
+            u (int): 頂点1
+            v (int): 頂点2
+
+        Returns:
+            int: 最小共通祖先(LCA)
+        """
         if self.dist[u] < self.dist[v]:
             u, v = v, u
         for i in range(self.max_bit):
@@ -44,4 +61,12 @@ class LCA:
         return self.parent[0][u]
 
     def depth(self, v):
+        """頂点 v の root からの距離
+
+        Args:
+            v (int): 頂点
+
+        Returns:
+            int: root からの距離
+        """
         return self.dist[v]
