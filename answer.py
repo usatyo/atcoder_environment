@@ -2,7 +2,7 @@ from sys import stdin
 
 
 def main(input):
-    return
+    pass
 
 
 if __name__ == "__main__":

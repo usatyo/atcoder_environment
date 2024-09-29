@@ -21,10 +21,21 @@ class Rerooting:
         self._childVal = defaultdict(lambda: e)
 
     def add_edge(self, u, v):
+        """u, v 間に無向辺を追加
+
+        Args:
+            u (int): 頂点1
+            v (int): 頂点2
+        """
         self._adj[u].append(v)
         self._adj[v].append(u)
 
     def reroot(self):
+        """木上での演算を実行
+
+        Returns:
+            list<any>: 各頂点を根とした木DPの結果
+        """
         parents = [-1] * self._n
         order = []
         stack = deque([0])

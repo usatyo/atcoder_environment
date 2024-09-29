@@ -5,8 +5,12 @@ def factorization(n):
         n (int): 素因数分解の対象
 
     Returns:
-        int[][]: [[素因数, 指数], ...]の2次元リスト
+        int[][]: [[素因数, 指数], ...]の2次元リスト.
     """
+
+    if n == 1:
+        return []
+    
     arr = []
     temp = n
     for i in range(2, int(-(-(n**0.5) // 1)) + 1):

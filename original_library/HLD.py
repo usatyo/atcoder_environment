@@ -22,10 +22,18 @@ hld.solve(node1, node2): 2node間の計算をします(関数opを使います)�
 """
 
 from collections import deque
+from atcoder.segtree import SegTree
 
 
 class HLD:
     def __init__(self, edge_list, op, e):
+        """初期化
+
+        Args:
+            edge_list (list<tuple>): [(node1, node2, weight), ...]
+            op (func): セグ木にのせる操作
+            e (any): セグ木にのせる単位元
+        """
         self.edge_list = edge_list
         self.op = op
         self.e = e
@@ -34,9 +42,9 @@ class HLD:
     def __build(self):
         self.N = len(self.edge_list) + 1  # 全ノードの数
         self.Graph = [[] for _ in range(self.N)]  # 無向グラフを構築
-        for n1, n2, weight in self.edge_list:
-            self.Graph[n1].append([n2, weight])
-            self.Graph[n2].append([n1, weight])
+        for u, v, weight in self.edge_list:
+            self.Graph[u].append([v, weight])
+            self.Graph[v].append([u, weight])
 
         self.siz = [1] * self.N  # 部分木のサイズ
         self.parent = [-1] * self.N  # 親ノード番号
@@ -88,9 +96,15 @@ class HLD:
                     self.top_dist[npos] = (npos, 0)
         self.weight_st_dict = dict()
         for top, weight_list in weight_list_dict.items():
-            self.weight_st_dict[top] = segtree(weight_list_dict[top], self.op, self.e)
+            self.weight_st_dict[top] = SegTree(self.op, self.e, weight_list_dict[top])
 
     def weight_set(self, edge_number, new_weight):
+        """重みを更新
+
+        Args:
+            edge_number (int): 初期化時の辺番号
+            new_weight (int): 更新後の重み
+        """
         a, b, old_weight = self.edge_list[edge_number]
         if self.parent[a] == b:
             a, b = b, a
@@ -99,11 +113,20 @@ class HLD:
         if b_dist > 0:
             self.weight_st_dict[b_top].set(b_dist - 1, new_weight)
 
-    def solve(self, n1, n2):
-        hd1 = self.heavy_depth[n1]
-        top1, dist1 = self.top_dist[n1]
-        hd2 = self.heavy_depth[n2]
-        top2, dist2 = self.top_dist[n2]
+    def solve(self, u, v):
+        """u, v 間のパス上の演算結果
+
+        Args:
+            u (int): 頂点1
+            v (int): 頂点2
+
+        Returns:
+            any: パス上の演算結果
+        """
+        hd1 = self.heavy_depth[u]
+        top1, dist1 = self.top_dist[u]
+        hd2 = self.heavy_depth[v]
+        top2, dist2 = self.top_dist[v]
         ans = self.e
         while True:
             if top1 == top2:
@@ -115,118 +138,13 @@ class HLD:
             if hd1 < hd2:
                 ans = self.op(ans, self.weight_st_dict[top2].prod(0, dist2))
                 ans = self.op(ans, self.to_parent_weight[top2])
-                n2 = self.parent[top2]
-                top2, dist2 = self.top_dist[n2]
+                v = self.parent[top2]
+                top2, dist2 = self.top_dist[v]
                 hd2 -= 1
             else:
                 ans = self.op(ans, self.weight_st_dict[top1].prod(0, dist1))
                 ans = self.op(ans, self.to_parent_weight[top1])
-                n1 = self.parent[top1]
-                top1, dist1 = self.top_dist[n1]
+                u = self.parent[top1]
+                top1, dist1 = self.top_dist[u]
                 hd1 -= 1
         return ans
-
-
-# shakayamiさん作のセグメントツリー
-class segtree:
-    n = 1
-    size = 1
-    log = 2
-    d = [0]
-    op = None
-    e = 10**15
-
-    def __init__(self, V, OP, E):
-        self.n = len(V)
-        self.op = OP
-        self.e = E
-        self.log = (self.n - 1).bit_length()
-        self.size = 1 << self.log
-        self.d = [E for i in range(2 * self.size)]
-        for i in range(self.n):
-            self.d[self.size + i] = V[i]
-        for i in range(self.size - 1, 0, -1):
-            self.update(i)
-
-    def set(self, p, x):
-        assert 0 <= p and p < self.n
-        p += self.size
-        self.d[p] = x
-        for i in range(1, self.log + 1):
-            self.update(p >> i)
-
-    def get(self, p):
-        assert 0 <= p and p < self.n
-        return self.d[p + self.size]
-
-    def prod(self, l, r):
-        assert 0 <= l and l <= r and r <= self.n
-        sml = self.e
-        smr = self.e
-        l += self.size
-        r += self.size
-        while l < r:
-            if l & 1:
-                sml = self.op(sml, self.d[l])
-                l += 1
-            if r & 1:
-                smr = self.op(self.d[r - 1], smr)
-                r -= 1
-            l >>= 1
-            r >>= 1
-        return self.op(sml, smr)
-
-    def all_prod(self):
-        return self.d[1]
-
-    def max_right(self, l, f):
-        assert 0 <= l and l <= self.n
-        assert f(self.e)
-        if l == self.n:
-            return self.n
-        l += self.size
-        sm = self.e
-        while 1:
-            while l % 2 == 0:
-                l >>= 1
-            if not (f(self.op(sm, self.d[l]))):
-                while l < self.size:
-                    l = 2 * l
-                    if f(self.op(sm, self.d[l])):
-                        sm = self.op(sm, self.d[l])
-                        l += 1
-                return l - self.size
-            sm = self.op(sm, self.d[l])
-            l += 1
-            if (l & -l) == l:
-                break
-        return self.n
-
-    def min_left(self, r, f):
-        assert 0 <= r and r < self.n
-        assert f(self.e)
-        if r == 0:
-            return 0
-        r += self.size
-        sm = self.e
-        while 1:
-            r -= 1
-            while r > 1 & (r % 2):
-                r >>= 1
-            if not (f(self.op(self.d[r], sm))):
-                while r < self.size:
-                    r = 2 * r + 1
-                    if f(self.op(self.d[r], sm)):
-                        sm = self.op(self.d[r], sm)
-                        r -= 1
-                return r + 1 - self.size
-            sm = self.op(self.d[r], sm)
-            if (r & -r) == r:
-                break
-        return 0
-
-    def update(self, k):
-        self.d[k] = self.op(self.d[2 * k], self.d[2 * k + 1])
-
-    def __str__(self):
-        return str([self.get(i) for i in range(self.n)])

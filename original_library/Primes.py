@@ -3,6 +3,14 @@ from math import sqrt
 
 
 def primes(n):
+    """素数のリスト生成
+
+    Args:
+        n (int): 調べる最大整数
+
+    Returns:
+        list<int>: n 以下の素数のリスト
+    """
     ret = []
     dic = defaultdict(bool)
     root = int(sqrt(n)) + 1

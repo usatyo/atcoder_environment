@@ -8,7 +8,7 @@ class LCA:
         self.adj = adj
         self.parent = [[-1] * self.n for _ in range(self.max_bit)]
         self.dist = [-1] * self.n
-        self.dfs(root)
+        self.__dfs(root)
         for i in range(1, self.max_bit):
             for v in range(n):
                 if self.parent[i - 1][v] < 0:
@@ -16,7 +16,7 @@ class LCA:
                 else:
                     self.parent[i][v] = self.parent[i - 1][self.parent[i - 1][v]]
 
-    def dfs(self, root):
+    def __dfs(self, root):
         self.parent[0][root] = root
         self.dist[root] = 0
         q = deque([root])

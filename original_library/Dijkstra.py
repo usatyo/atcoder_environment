@@ -66,7 +66,7 @@ class Dijkstra:
         """木の直径
 
         Returns:
-            float: 木の直径
+            int: 木の直径
         """
         d = self.search(0)
         u = 0
