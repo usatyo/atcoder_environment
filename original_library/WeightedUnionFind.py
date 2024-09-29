@@ -1,32 +1,55 @@
+from sys import setrecursionlimit
+
+setrecursionlimit(10**7)
+
+
 class WeightedUnionFind:
-    def __init__(self, n):
-        self.par = [i for i in range(n + 1)]
-        self.rank = [0] * (n + 1)
-        self.weight = [0] * (n + 1)
+    def __init__(self, N):
+        self.N = N
+        self.parents = [-1] * N
+        self.rank = [0] * N
+        self.weight = [0] * N
 
-    def leader(self, x):
-        if self.par[x] == x:
+    def root(self, x):
+        if self.parents[x] == -1:
             return x
-        else:
-            y = self.leader(self.par[x])
-            self.weight[x] += self.weight[self.par[x]]
-            self.par[x] = y
-            return y
+        rx = self.root(self.parents[x])
+        self.weight[x] += self.weight[self.parents[x]]
+        self.parents[x] = rx
+        return self.parents[x]
 
-    def merge(self, x, y, w):
-        rx = self.leader(x)
-        ry = self.leader(y)
+    def get_weight(self, x):
+        self.root(x)
+        return self.weight[x]
+
+    def merge(self, x, y, d):
+        """
+        A[x] - A[y] = d
+        """
+        w = d + self.get_weight(x) - self.get_weight(y)
+        rx = self.root(x)
+        ry = self.root(y)
+        if rx == ry:
+            _, d_xy = self.diff(x, y)
+            if d_xy == d:
+                return True
+            else:
+                return False
         if self.rank[rx] < self.rank[ry]:
-            self.par[rx] = ry
-            self.weight[rx] = w - self.weight[x] + self.weight[y]
-        else:
-            self.par[ry] = rx
-            self.weight[ry] = -w - self.weight[y] + self.weight[x]
-            if self.rank[rx] == self.rank[ry]:
-                self.rank[rx] += 1
+            rx, ry = ry, rx
+            w = -w
+        if self.rank[rx] == self.rank[ry]:
+            self.rank[rx] += 1
+
+        self.parents[ry] = rx
+        self.weight[ry] = w
+        return True
 
     def same(self, x, y):
-        return self.leader(x) == self.leader(y)
+        return self.root(x) == self.root(y)
 
     def diff(self, x, y):
-        return self.weight[x] - self.weight[y]
+        if self.same(x, y):
+            return True, self.get_weight(y) - self.get_weight(x)
+        else:
+            return False, 0
