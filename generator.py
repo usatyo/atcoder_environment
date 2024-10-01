@@ -4,11 +4,23 @@ from random import randint, random, shuffle
 class generator:
     def generate(self):
         self.file = open("input.txt", "w")
-        n = randint(1, 10)
-        k = randint(1, 10)
-        self.file.write(f"1\n")
-        self.file.write(f"{n} {k}\n")
+        self._make_sample()
         self.file.close()
+
+    def _make_sample(self):
+        n = randint(1, 7)
+        m = randint(0, n * (n - 1) // 2)
+        edges = []
+        for _ in range(m):
+            while True:
+                e = (randint(1, n), randint(1, n))
+                if e[0] < e[1] and not e in edges:
+                    break
+            edges.append(e)
+
+        self.file.write(" ".join([str(n), str(m), "\n"]))
+        for i in range(m):
+            self.file.write(" ".join([str(edges[i][0]), str(edges[i][1]), "\n"]))
 
     def _random_tree(self):
         pass

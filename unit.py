@@ -13,18 +13,24 @@ class Test(unittest.TestCase):
         gen = generator()
         gen.generate()
         file = open("input.txt", "r")
-        self.assertEqual(main(lambda: file.readline().rstrip()), honesty())
+        ans = main(lambda: file.readline().rstrip())
+        honest = honesty()
+        self.assertEqual(ans, honest, msg=f"\nYour Value: {ans}\nTrue Value: {honest}")
         file.close()
 
-    def _test_multiple_cases(self):
+    def test_multiple_cases(self):
         gen = generator()
         for _ in range(LOOP):
             gen.generate()
             file = open("input.txt", "r")
-            self.assertEqual(main(lambda: file.readline().rstrip()), honesty())
+            ans = main(lambda: file.readline().rstrip())
+            honest = honesty()
+            self.assertEqual(
+                ans, honest, msg=f"\nYour Value: {ans}\nTrue Value: {honest}"
+            )
             file.close()
 
-    def test_satisfy_conditions(self):
+    def _test_satisfy_conditions(self):
         gen = generator()
         for _ in range(LOOP):
             gen.generate()
