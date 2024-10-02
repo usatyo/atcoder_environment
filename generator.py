@@ -9,28 +9,40 @@ class generator:
         return info
 
     def _make_sample(self):
-        n = randint(1, 5)
-        m = randint(0, n * (n - 1) // 2)
+        n = randint(2, 100)
+        edge = self._random_tree(n)
+        self.file.write(f"{n}\n")
+        for u, v in edge:
+            self.file.write(f"{u} {v}\n")
+
+    def _random_tree(self, n):
+        assert n >= 2
         edge = []
-        for _ in range(m):
-            while True:
-                a = randint(1, n)
-                b = randint(1, n)
-                if a < b and (a, b) not in edge:
-                    edge.append((a, b))
+        prufer = [randint(0, n - 1) for _ in range(n - 2)]
+        d = [prufer.count(i) + 1 for i in range(n)]
+        for i in range(n - 2):
+            for j in range(n):
+                if d[j] == 1:
+                    edge.append((j + 1, prufer[i] + 1))
+                    d[j] -= 1
+                    d[prufer[i]] -= 1
                     break
 
-        self.file.write(" ".join([str(n), str(m), "\n"]))
-        for i in range(m):
-            self.file.write(" ".join(map(str, edge[i])) + "\n")
+        rest = []
+        for i in range(n):
+            if d[i] == 1:
+                rest.append(i)
+        edge.append((rest[0] + 1, rest[1] + 1))
+        return edge
 
-        return [n, m, edge]
-
-    def _random_tree(self):
-        pass
-
-    def _gen_random_prime(self, min=2, max=10**8):
-        pass
+    def _gen_random_prime(self, min=2, max=10**3):
+        while True:
+            num = randint(min, max)
+            for i in range(2, int(num**0.5) + 1):
+                if num % i == 0:
+                    break
+            else:
+                return num
 
     def _push_random_array(self, n, min=1, max=10**8):
         l = [str(randint(min, max)) for _ in range(n)]

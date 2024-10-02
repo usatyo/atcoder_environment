@@ -71,17 +71,17 @@ class Dijkstra:
         d = self.search(0)
         u = 0
         max_cost = -1
-        for key in d.keys():
-            if max_cost < d[key]:
-                u = key
-                max_cost = d[key]
+        for i in range(self.n):
+            if max_cost < d[i]:
+                u = i
+                max_cost = d[i]
 
         du = self.search(u)
         v = 0
         max_cost = 0
-        for key in du.keys():
-            if max_cost < du[key]:
-                v = key
-                max_cost = du[key]
+        for i in range(self.n):
+            if max_cost < du[i]:
+                v = i
+                max_cost = du[i]
 
         return max_cost
