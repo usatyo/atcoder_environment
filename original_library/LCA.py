@@ -61,7 +61,7 @@ class LCA:
         return self.parent[0][u]
 
     def depth(self, v):
-        """頂点 v の root からの距離
+        """頂点 v の root からの距離. O(1)
 
         Args:
             v (int): 頂点

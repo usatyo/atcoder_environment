@@ -1,26 +1,3 @@
-"""Heavy-Light-Decomposition
-
-重み付きの無向辺から構成される木を、HL分解します。
-
-中のセグメントツリーは、shakayamiさん作のものを使っています。
-参考URL【https://github.com/shakayami/ACL-for-python/blob/master/segtree.py】
-つかいかたURL【https://github.com/shakayami/ACL-for-python/wiki/segtree】
-
-・つかいかた
-(以下のノード番号、辺番号はすべて0-indexedです。)
-(node1, node2, weight) が格納されている edge_list を用意します。
-op, e: セグメントツリーにのせる関数と、その単位元です。詳しいことは上のつかいかたURLにあります。
-hld = HLD(edge_list, op, e) : インスタンス生成
-hld.weight_set(edge_number, new_weight): 辺 edge_number の重みを new_weight に変更します。
-hld.solve(node1, node2): 2node間の計算をします(関数opを使います)。
-
-・計算量
-インスタンス作成: O(N)
-辺の重み変更: O(1)
-2ノード間の計算: O((logN)^2)
-⇒ クエリ個数がQのとき、トータルでO(N+Q(logN)^2)
-"""
-
 from collections import deque
 from atcoder.segtree import SegTree
 
@@ -99,7 +76,7 @@ class HLD:
             self.weight_st_dict[top] = SegTree(self.op, self.e, weight_list_dict[top])
 
     def weight_set(self, edge_number, new_weight):
-        """重みを更新
+        """重みを更新. O(1)
 
         Args:
             edge_number (int): 初期化時の辺番号
@@ -114,7 +91,7 @@ class HLD:
             self.weight_st_dict[b_top].set(b_dist - 1, new_weight)
 
     def solve(self, u, v):
-        """u, v 間のパス上の演算結果
+        """u, v 間のパス上の演算結果. O((log N)^2)
 
         Args:
             u (int): 頂点1

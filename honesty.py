@@ -1,7 +1,11 @@
 def main(input):
-    return
+    ans = 0
+
+    return ans
 
 
 def honesty():
     file = open("input.txt", "r")
-    return main(lambda: file.readline().rstrip())
+    ans = main(lambda: file.readline().rstrip())
+    file.close()
+    return ans

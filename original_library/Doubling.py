@@ -20,7 +20,7 @@ class Doubling:
 
             self.next.append(next[::])
 
-    def solve(self, start, k):
+    def pow(self, start, k):
         """start の状態から k 回遷移後の状態を返す. O(log k)
 
         Args:
