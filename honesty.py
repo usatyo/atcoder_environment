@@ -1,7 +1,8 @@
 def main(input):
-    ans = 0
-
-    return ans
+    n = int(input())
+    a = list(map(int, input().split()))
+    a.sort()
+    return a
 
 
 def honesty():

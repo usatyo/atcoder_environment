@@ -1,4 +1,4 @@
-from random import randint, random, shuffle
+from random import choice, randint, random, shuffle
 
 
 class generator:
@@ -9,11 +9,21 @@ class generator:
         return info
 
     def _make_sample(self):
-        n = randint(2, 100)
-        edge = self._random_tree(n)
+        n = randint(1, 15)
         self.file.write(f"{n}\n")
-        for u, v in edge:
-            self.file.write(f"{u} {v}\n")
+        return self._push_random_array(n, min=0, max=10)
+
+    def _simple_graph(self, n, m):
+        assert 0 <= m <= n * (n - 1) // 2
+        edge = []
+        for _ in range(m):
+            while True:
+                a = randint(1, n)
+                b = randint(1, n)
+                if a != b and (a, b) not in edge and (b, a) not in edge:
+                    edge.append((a, b))
+                    break
+        return edge
 
     def _random_tree(self, n):
         assert n >= 2
@@ -47,8 +57,10 @@ class generator:
     def _push_random_array(self, n, min=1, max=10**8):
         l = [str(randint(min, max)) for _ in range(n)]
         self.file.write(" ".join(map(str, l)))
+        return l
 
     def _push_random_permutation(self, n):
         ret = list(range(1, n + 1))
         shuffle(ret)
         self.file.write(" ".join(map(str, ret)))
+        return ret
