@@ -9,9 +9,14 @@ class generator:
         return info
 
     def _make_sample(self):
-        n = randint(1, 15)
-        self.file.write(f"{n}\n")
-        return self._push_random_array(n, min=0, max=10)
+        n = randint(1, 7)
+        k = randint(1, n)
+        edge = self._random_tree(n)
+
+        self.file.write(f"{n} {k}\n")
+        for u, v in edge:
+            self.file.write(f"{u} {v}\n")
+        return self._push_random_permutation(n), edge, k
 
     def _simple_graph(self, n, m):
         assert 0 <= m <= n * (n - 1) // 2
@@ -26,7 +31,8 @@ class generator:
         return edge
 
     def _random_tree(self, n):
-        assert n >= 2
+        if n == 1:
+            return []
         edge = []
         prufer = [randint(0, n - 1) for _ in range(n - 2)]
         d = [prufer.count(i) + 1 for i in range(n)]
