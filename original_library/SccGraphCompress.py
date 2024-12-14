@@ -23,7 +23,7 @@ class CompressSccGraph:
         """
         assert 0 <= from_vertex < self.n_before
         assert 0 <= to_vertex < self.n_before
-        assert self.compressed == False, "use add_edge() before compress()"
+        assert not self.compressed, "use add_edge() before compress()"
         self.graph.add_edge(from_vertex, to_vertex)
         self.adj_before[from_vertex].append(to_vertex)
 
@@ -49,7 +49,7 @@ class CompressSccGraph:
         Returns:
             int: 圧縮後の頂点数
         """
-        assert self.compressed == True, "use size() after compress()"
+        assert self.compressed, "use size() after compress()"
         return self.n_after
 
     def adj(self, v):
@@ -61,7 +61,7 @@ class CompressSccGraph:
         Returns:
             list: vの隣接リスト
         """
-        assert self.compressed == True, "use adj() after compress()"
+        assert self.compressed, "use adj() after compress()"
         assert 0 <= v < self.n_after
         return list(self.adj_after[v])
 
@@ -74,7 +74,7 @@ class CompressSccGraph:
         Returns:
             int: 圧縮後の頂点
         """
-        assert self.compressed == True, "use forward() after compress()"
+        assert self.compressed, "use forward() after compress()"
         assert 0 <= v < self.n_before
         return self.label[v]
 
@@ -87,6 +87,6 @@ class CompressSccGraph:
         Returns:
             list: 圧縮前の頂点のリスト
         """
-        assert self.compressed == True, "use backward() after compress()"
+        assert self.compressed, "use backward() after compress()"
         assert 0 <= v < self.n_after
         return self.res[v]
