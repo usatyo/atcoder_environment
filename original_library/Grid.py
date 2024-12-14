@@ -14,10 +14,10 @@ class Grid:
     def __init__(self, h, w) -> None:
         self.h = h
         self.w = w
-        self._grid = [[self.cell(self.WHITE)] * self.w for _ in range(self.h)]
+        self._grid = [[self.WHITE] * self.w for _ in range(self.h)]
 
     def draw(self, x, y, color=RED):
-        self._grid[x][y] = self.cell(color)
+        self._grid[x][y] = color
 
     def cell(self, color):
         return f"\033[3{color}m██\033[0m"
@@ -26,4 +26,4 @@ class Grid:
         if "ATCODER" in environ:
             return
         for row in self._grid:
-            print(*row, sep="")
+            print(*[self.cell(x) for x in row], sep="")
