@@ -9,11 +9,11 @@ class generator:
         return info
 
     def _make_sample(self):
-        n = randint(2, 5)
-        a = [randint(1, 10) for _ in range(n)]
+        n = randint(1, 1000000000000)
+        # a = [randint(1, 10) for _ in range(n)]
         self.file.write(f"{n}\n")
-        self.file.write(f"{' '.join(map(str, a))}\n")
-        return n, a
+        # self.file.write(f"{' '.join(map(str, a))}\n")
+        return n
 
     def _simple_graph(self, n, m):
         assert 0 <= m <= n * (n - 1) // 2

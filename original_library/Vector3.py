@@ -1,6 +1,3 @@
-from math import cos, sin
-
-
 class Vector3:
     def __init__(self, x, y, z):
         self.x = x

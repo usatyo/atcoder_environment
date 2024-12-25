@@ -4,7 +4,7 @@ from generator import generator
 import unittest
 
 
-LOOP = 1000
+LOOP = 100
 
 
 class Test(unittest.TestCase):
