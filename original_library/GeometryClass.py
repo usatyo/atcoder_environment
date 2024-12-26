@@ -1,7 +1,7 @@
 from collections import deque
 from math import atan2, cos, pi, sin
 
-EPS = 1e-7
+EPS = 1e-8
 SCALE = 10**5
 DIGITS = 10
 
@@ -145,6 +145,17 @@ class Segment:
     def to_vector(self) -> Vector:
         return self.p2 - self.p1
 
+    def coef(self) -> float:
+        """傾き
+
+        Returns:
+            float: 直線の傾き, y軸に平行な場合は inf
+        """
+        if equal(self.p1.x, self.p2.x):
+            return float("inf")
+        else:
+            return (self.p2.y - self.p1.y) / (self.p2.x - self.p1.x)
+
     def projection(self, p: Vector) -> Vector:
         """射影
 
@@ -167,6 +178,17 @@ class Segment:
             Vector: 反射後の座標
         """
         return p + (self.projection(p) - p) * 2
+
+    def bisecter(self) -> "Segment":
+        """垂直二等分線
+
+        Returns:
+            Segment: 計算結果の線分
+        """
+        center = (self.p1 + self.p2) / 2
+        p1 = self.p1.rotate(pi / 2, center)
+        p2 = self.p2.rotate(pi / 2, center)
+        return Segment(p1, p2)
 
     def is_parallel(self, other: "Segment") -> bool:
         """平行かどうか判定
@@ -587,8 +609,8 @@ class Circle:
 
 
 class PillowManager:
-    SIZE = 500
-    OFFSET = 100
+    SIZE = 1000
+    OFFSET = 0
 
     def __init__(self, bottom=0, top=500, axis=True, grid: int = None) -> None:
         from PIL import Image, ImageDraw
@@ -615,16 +637,22 @@ class PillowManager:
         return Vector(x, y)
 
     def _add_axis(self) -> None:
-        self.draw_segment(Segment(Vector(self.bottom, 0), Vector(self.top, 0)), width=3)
-        self.draw_segment(Segment(Vector(0, self.bottom), Vector(0, self.top)), width=3)
+        axis_x = Segment(Vector(self.bottom, 0), Vector(self.top, 0))
+        axis_y = Segment(Vector(0, self.bottom), Vector(0, self.top))
+        self.draw_segment(axis_x, width=3, color=(200, 200, 200))
+        self.draw_segment(axis_y, width=3, color=(200, 200, 200))
 
     def _add_grid(self, grid: int) -> None:
         for i in range(0, self.top + 1, grid):
-            self.draw_segment(Segment(Vector(i, self.bottom), Vector(i, self.top)))
-            self.draw_segment(Segment(Vector(self.bottom, i), Vector(self.top, i)))
+            parallel_x = Segment(Vector(i, self.bottom), Vector(i, self.top))
+            parallel_y = Segment(Vector(self.bottom, i), Vector(self.top, i))
+            self.draw_segment(parallel_x, color=(200, 200, 200))
+            self.draw_segment(parallel_y, color=(200, 200, 200))
         for i in range(0, self.bottom - 1, -grid):
-            self.draw_segment(Segment(Vector(i, self.bottom), Vector(i, self.top)))
-            self.draw_segment(Segment(Vector(self.bottom, i), Vector(self.top, i)))
+            parallel_x = Segment(Vector(i, self.bottom), Vector(i, self.top))
+            parallel_y = Segment(Vector(self.bottom, i), Vector(self.top, i))
+            self.draw_segment(parallel_x, color=(200, 200, 200))
+            self.draw_segment(parallel_y, color=(200, 200, 200))
 
     def draw_point(self, p: Vector, size=None, color=(0, 0, 0)) -> None:
         self._check_point(p)
@@ -636,7 +664,7 @@ class PillowManager:
             fill=color,
         )
 
-    def draw_segment(self, segment: Segment, width=1, color=(200, 200, 200)) -> None:
+    def draw_segment(self, segment: Segment, width=1, color=(0, 0, 0)) -> None:
         p1 = self._convert(segment.p1)
         p2 = self._convert(segment.p2)
         self.draw.line((p1.x, p1.y, p2.x, p2.y), fill=color, width=width)

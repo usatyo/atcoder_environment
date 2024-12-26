@@ -1,6 +1,6 @@
 from answer import main
 from honesty import honesty
-from generator import generator
+from generator import Generator
 import unittest
 
 
@@ -9,7 +9,7 @@ LOOP = 100
 
 class Test(unittest.TestCase):
     def _test_single_case(self):
-        gen = generator()
+        gen = Generator()
         gen.generate()
         file = open("input.txt", "r")
         ans = main(lambda: file.readline().rstrip())
@@ -18,7 +18,7 @@ class Test(unittest.TestCase):
         self.assertEqual(ans, honest, msg=f"\nYour Value: {ans}\nTrue Value: {honest}")
 
     def test_multiple_cases(self):
-        gen = generator()
+        gen = Generator()
         for _ in range(LOOP):
             info = gen.generate()
             file = open("input.txt", "r")
@@ -31,7 +31,7 @@ class Test(unittest.TestCase):
                 )
 
     def _test_satisfy_conditions(self):
-        gen = generator()
+        gen = Generator()
         for _ in range(LOOP):
             info = gen.generate()
             file = open("input.txt", "r")

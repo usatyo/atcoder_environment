@@ -1,7 +1,7 @@
 from random import choice, randint, random, shuffle
 
 
-class generator:
+class Generator:
     def generate(self):
         self.file = open("input.txt", "w")
         info = self._make_sample()
@@ -9,11 +9,16 @@ class generator:
         return info
 
     def _make_sample(self):
-        n = randint(1, 1000000000000)
-        # a = [randint(1, 10) for _ in range(n)]
+        n = randint(1, 10)
         self.file.write(f"{n}\n")
+        xys = []
+        for _ in range(n):
+            x = randint(-10, 10)
+            y = randint(-10, 10)
+            self.file.write(f"{x} {y}\n")
+            xys.append((x, y))
         # self.file.write(f"{' '.join(map(str, a))}\n")
-        return n
+        return n, xys
 
     def _simple_graph(self, n, m):
         assert 0 <= m <= n * (n - 1) // 2
@@ -67,3 +72,8 @@ class generator:
         shuffle(ret)
         self.file.write(" ".join(map(str, ret)))
         return ret
+
+
+if __name__ == "__main__":
+    gen = Generator()
+    gen.generate()
