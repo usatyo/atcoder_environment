@@ -11,48 +11,82 @@ def equal(a, b):
 
 
 class Vector:
-    def __init__(self, x, y):
+    def __init__(self, x, y) -> None:
         self.x = x
         self.y = y
 
-    def __add__(self, other: "Vector"):
+    def __add__(self, other: "Vector") -> "Vector":
         return Vector(self.x + other.x, self.y + other.y)
 
-    def __sub__(self, other: "Vector"):
+    def __sub__(self, other: "Vector") -> "Vector":
         return Vector(self.x - other.x, self.y - other.y)
 
-    def __mul__(self, other):
+    def __mul__(self, other) -> "Vector":
         return Vector(self.x * other, self.y * other)
 
-    def __truediv__(self, other):
+    def __truediv__(self, other) -> "Vector":
         assert other != 0, "division by zero"
         return Vector(self.x / other, self.y / other)
 
-    def __abs__(self):
+    def __abs__(self) -> float:
         return (self.x**2 + self.y**2) ** 0.5
 
-    def __eq__(self, other: "Vector"):
+    def __eq__(self, other: "Vector") -> bool:
         return equal(self.x, other.x) and equal(self.y, other.y)
 
-    def __ne__(self, other: "Vector"):
+    def __ne__(self, other: "Vector") -> bool:
         return not (self == other)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.x:.{DIGITS}f} {self.y:.{DIGITS}f}"
 
-    def format(self):
+    def format(self) -> str:
         return f"({self.x:.{DIGITS}f}, {self.y:.{DIGITS}f})"
 
-    def dot(self, other: "Vector"):
+    def dot(self, other: "Vector") -> float:
+        """内積
+
+        Args:
+            other (Vector): 演算対象
+
+        Returns:
+            float: 計算結果
+        """
         return self.x * other.x + self.y * other.y
 
-    def cross(self, other: "Vector"):
+    def cross(self, other: "Vector") -> float:
+        """外積
+
+        Args:
+            other (Vector): 演算対象のベクトル
+
+        Returns:
+            float: 計算結果
+        """
         return self.x * other.y - self.y * other.x
 
-    def move(self, dx, dy):
+    def move(self, dx, dy) -> "Vector":
+        """平行移動
+
+        Args:
+            dx (float): x軸方向の移動量
+            dy (float): y軸方向の移動量
+
+        Returns:
+            Vector: 移動後の座標
+        """
         return Vector(self.x + dx, self.y + dy)
 
-    def rotate(self, theta, origin: "Vector" = None):
+    def rotate(self, theta, origin: "Vector" = None) -> "Vector":
+        """回転移動
+
+        Args:
+            theta (float): 回転する角度（ラジアン）
+            origin (Vector, optional): 原点. Defaults to (0, 0).
+
+        Returns:
+            Vector: 移動後の座標
+        """
         if origin is None:
             origin = Vector(0, 0)
         self = self - origin
@@ -61,16 +95,21 @@ class Vector:
             self.x * sin(theta) + self.y * cos(theta),
         )
 
-    def norm(self):
-        return abs(self)
-
-    def square_norm(self):
+    def square_norm(self) -> float:
         return self.x**2 + self.y**2
 
-    def copy(self):
+    def copy(self) -> "Vector":
         return Vector(self.x, self.y)
 
-    def ccw(self, other: "Vector"):
+    def ccw(self, other: "Vector") -> int:
+        """回転方向を判定
+
+        Args:
+            other (Vector): もう片方のベクトル
+
+        Returns:
+            int: (self から見て other が) 1: 反時計回り, -1: 時計回り, 0: 直線上
+        """
         if equal(self.cross(other), 0):
             return 0
         elif self.cross(other) < 0:
@@ -78,56 +117,88 @@ class Vector:
         else:
             return 1
 
-    def unit_vector(self):
+    def unit_vector(self) -> "Vector":
+        """単位ベクトルを取得
+
+        Returns:
+            Vector: 同じ方向の単位ベクトル
+        """
         if equal(abs(self), 0):
             return Vector(0, 0)
         return self / abs(self)
 
 
 class Segment:
-    def __init__(self, p1: Vector, p2: Vector, extend1=False, extend2=False):
+    def __init__(self, p1: Vector, p2: Vector) -> None:
         self.p1 = p1.copy()
         self.p2 = p2.copy()
-        if extend1:
-            self.extend(reverse=True)
-        if extend2:
-            self.extend()
 
-    def __abs__(self):
+    def __abs__(self) -> float:
         return abs(self.p2 - self.p1)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.p1} {self.p2}"
 
-    def fromat(self):
+    def format(self) -> str:
         return f"{self.p1.format()} -- {self.p2.format()}"
 
-    def to_vector(self):
+    def to_vector(self) -> Vector:
         return self.p2 - self.p1
 
-    def extend(self, dist=SCALE, reverse=False):
-        if self.p1 == self.p2:
-            return False
-        if reverse:
-            self.p1 = self.p2 + self.to_vector().unit_vector() * (abs(self) + dist)
-        else:
-            self.p2 = self.p1 + self.to_vector().unit_vector() * (abs(self) + dist)
-        return True
+    def projection(self, p: Vector) -> Vector:
+        """射影
 
-    def projection(self, p: Vector):
+        Args:
+            p (Vector): もとの座標
+
+        Returns:
+            Vector: 移動後の座標
+        """
         base = self.to_vector()
         return self.p1 + base * (p - self.p1).dot(base) / base.square_norm()
 
-    def reflection(self, p: Vector):
+    def reflection(self, p: Vector) -> Vector:
+        """反射
+
+        Args:
+            p (Vector): もとの座標
+
+        Returns:
+            Vector: 反射後の座標
+        """
         return p + (self.projection(p) - p) * 2
 
-    def is_parallel(self, other: "Segment"):
+    def is_parallel(self, other: "Segment") -> bool:
+        """平行かどうか判定
+
+        Args:
+            other (Segment): 比較対象の線分
+
+        Returns:
+            bool: True: 平行, False: 平行でない
+        """
         return equal(self.to_vector().cross(other.to_vector()), 0)
 
-    def is_orthogonal(self, other: "Segment"):
+    def is_orthogonal(self, other: "Segment") -> bool:
+        """ "垂直かどうか判定
+
+        Args:
+            other (Segment): 比較対象の線分
+
+        Returns:
+            bool: True: 垂直, False: 垂直でない
+        """
         return equal(self.to_vector().dot(other.to_vector()), 0)
 
-    def is_contain_point(self, p: Vector):
+    def is_contain_point(self, p: Vector) -> bool:
+        """線分上に点 p が存在するかどうか
+
+        Args:
+            p (Vector): 判定対象の点
+
+        Returns:
+            bool: True: 線分上に存在, False: 線分上に存在しない
+        """
         if self.p1 == p or self.p2 == p:
             return True
         if self.p1 == self.p2:
@@ -140,7 +211,15 @@ class Segment:
         )
         return onLine and between
 
-    def is_crossing(self, other: "Segment"):
+    def is_crossing(self, other: "Segment") -> bool:
+        """線分の交差判定
+
+        Args:
+            other (Segment): 判定対象の線分
+
+        Returns:
+            bool: True: 交差, False: 交差しない
+        """
         if (
             self.is_contain_point(other.p1)
             or self.is_contain_point(other.p2)
@@ -155,7 +234,15 @@ class Segment:
             self.p2 - other.p1
         )
 
-    def crossing_point(self, other: "Segment"):
+    def crossing_point(self, other: "Segment") -> Vector:
+        """線分同士の交点
+
+        Args:
+            other (Segment): 対象の線分
+
+        Returns:
+            Vector: 交点の座標. 交差しない場合は None
+        """
         if self.is_parallel(other) or not self.is_crossing(other):
             return None
         d1 = self.to_vector().cross(other.to_vector())
@@ -164,13 +251,30 @@ class Segment:
             return other.p1
         return other.p1 + other.to_vector() * (d2 / d1)
 
-    def distance_to_point(self, p: Vector, line=False):
+    def distance_to_point(self, p: Vector, line=False) -> float:
+        """線分と点の距離
+
+        Args:
+            p (Vector): 対象の点
+            line (bool, optional): 直線に変更する場合 True. Defaults to False.
+
+        Returns:
+            float: 距離
+        """
         projection = self.projection(p)
         if line or self.is_contain_point(projection):
             return abs(p - projection)
         return min(abs(p - self.p1), abs(p - self.p2))
 
-    def distance_to_segment(self, other: "Segment"):
+    def distance_to_segment(self, other: "Segment") -> float:
+        """線分と線分の距離
+
+        Args:
+            other (Segment): 対象の線分
+
+        Returns:
+            float: 最も近い2点の距離
+        """
         if self.is_crossing(other):
             return 0
         return min(
@@ -182,7 +286,7 @@ class Segment:
 
 
 class Polygon:
-    def __init__(self, points: list[Vector]):
+    def __init__(self, points: list[Vector]) -> None:
         """初期化
 
         Args:
@@ -191,13 +295,18 @@ class Polygon:
         self.points = [p.copy() for p in points]
         self.n = len(self.points)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return "\n".join([str(p) for p in self.points])
 
-    def format(self):
+    def format(self) -> str:
         return " -> ".join([p.format() for p in self.points])
 
-    def area(self):
+    def area(self) -> float:
+        """多角形内部の面積
+
+        Returns:
+            float: 面積
+        """
         area = 0
         for i in range(self.n):
             p1 = self.points[i]
@@ -205,7 +314,12 @@ class Polygon:
             area += p1.cross(p2) / 2
         return abs(area)
 
-    def is_convex(self):
+    def is_convex(self) -> bool:
+        """凸多角形かどうか判定
+
+        Returns:
+            bool: True: 凸多角形, False: 凹多角形. 3点が一直線上にある場合も True
+        """
         top = 0
         bottom = 0
         for i in range(self.n):
@@ -216,7 +330,7 @@ class Polygon:
             bottom = min(bottom, (b - a).ccw(c - b))
         return not (top == 1 and bottom == -1)
 
-    def is_inside(self, p: Vector):
+    def is_inside(self, p: Vector) -> int:
         """多角形と点の位置関係を判定
 
         Args:
@@ -235,7 +349,12 @@ class Polygon:
             theta += atan2((a - p).cross(b - p), (a - p).dot(b - p))
         return -1 if equal(theta, 0) else 1
 
-    def construct_convex_hull(self):
+    def construct_convex_hull(self) -> int:
+        """現在 self に含まれている点から凸包を構成し、自身を置き換える
+
+        Returns:
+            int: 凸包の頂点数
+        """
         points = self.points
         points.sort(key=lambda p: (p.y, p.x))
 
@@ -288,7 +407,12 @@ class Polygon:
         self.n = len(self.points)
         return self.n
 
-    def diameter(self):
+    def diameter(self) -> float:
+        """多角形の直径（最遠点対）
+
+        Returns:
+            float: 直径
+        """
         self.construct_convex_hull()
         if self.n == 2:
             return abs(self.points[0] - self.points[1])
@@ -311,7 +435,7 @@ class Polygon:
 
         return res
 
-    def common_polygon(self, other: "Polygon"):
+    def common_polygon(self, other: "Polygon") -> "Polygon":
         """多角形同士の共通部分
 
         Args:
@@ -343,18 +467,18 @@ class Polygon:
 
 
 class Circle:
-    def __init__(self, center: Vector, radius: float):
+    def __init__(self, center: Vector, radius: float) -> None:
         assert radius > 0, "radius must be positive"
         self.center = center.copy()
         self.radius = radius
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.center} {self.radius}"
 
-    def format(self):
+    def format(self) -> str:
         return f"o: {self.center.format()}, r: {self.radius:.{DIGITS}f}"
 
-    def is_touching_circle(self, other: "Circle"):
+    def is_touching_circle(self, other: "Circle") -> int:
         """円が接しているかどうかを判定
 
         Args:
@@ -372,7 +496,7 @@ class Circle:
         else:
             return 0
 
-    def is_crossing_circle(self, other: "Circle"):
+    def is_crossing_circle(self, other: "Circle") -> bool:
         """円が交差しているかどうかを判定
 
         Args:
@@ -390,7 +514,15 @@ class Circle:
         else:
             return True
 
-    def crossing_points_circle(self, other: "Circle"):
+    def crossing_points_circle(self, other: "Circle") -> list[Vector]:
+        """円と円の交点
+
+        Args:
+            other (Circle): 対象の円
+
+        Returns:
+            list[Vector]: 0~2個の交点を含むリスト
+        """
         if self.is_touching_circle(other) == 1:
             unit = (other.center - self.center).unit_vector()
             if self.radius > other.radius:
@@ -410,21 +542,114 @@ class Circle:
         else:
             return []
 
-    def is_touching_segment(self, other: Segment):
+    def is_touching_line(self, other: Segment) -> bool:
+        """直線と円が接しているかどうかを判定
+
+        Args:
+            other (Segment): 対象の直線
+
+        Returns:
+            bool: True: 接している, False: 接していない
+        """
         return equal(other.distance_to_point(self.center, line=True), self.radius)
 
-    def is_crossing_segment(self, other: Segment):
-        if self.is_touching_segment(other):
+    def is_crossing_line(self, other: Segment) -> bool:
+        """直線と円が2点以上で交わるかどうかを判定
+
+        Args:
+            other (Segment): 対象の直線
+
+        Returns:
+            bool: 2点以上で交わるかどうか
+        """
+        if self.is_touching_line(other):
             return False
         return other.distance_to_point(self.center, line=True) < self.radius
 
-    def crossing_points_segment(self, other: Segment):
-        if not self.is_touching_segment(other) and not self.is_crossing_segment(other):
+    def crossing_points_segment(self, other: Segment) -> list[Vector]:
+        """直線と円の交点
+
+        Args:
+            other (Segment): 対象の直線
+
+        Returns:
+            list[Vector]: 0~2個の交点を含むリスト
+        """
+        if not self.is_touching_line(other) and not self.is_crossing_line(other):
             return []
         projection = other.projection(self.center)
-        if self.is_touching_segment(other):
+        if self.is_touching_line(other):
             return [projection]
         dist = abs(projection - self.center)
         unit = other.to_vector().unit_vector()
         d = (self.radius**2 - dist**2) ** 0.5
         return [projection + unit * d, projection - unit * d]
+
+
+class PillowManager:
+    SIZE = 500
+    OFFSET = 100
+
+    def __init__(self, bottom=0, top=500, axis=True, grid: int = None) -> None:
+        from PIL import Image, ImageDraw
+
+        self.im = Image.new(
+            "RGB",
+            (self.SIZE + self.OFFSET * 2, self.SIZE + self.OFFSET * 2),
+            (255, 255, 255),
+        )
+        self.draw = ImageDraw.Draw(self.im)
+        self.bottom = bottom
+        self.top = top
+        axis and self._add_axis()
+        (grid is not None) and self._add_grid(grid)
+
+    def _check_point(self, p: Vector) -> None:
+        assert self.bottom <= p.x <= self.top, f"{p.x=} is out of range"
+        assert self.bottom <= p.y <= self.top, f"{p.y=} is out of range"
+
+    def _convert(self, p: Vector) -> Vector:
+        magn = self.SIZE / (self.top - self.bottom)
+        x = (p.x - self.bottom) * magn + self.OFFSET
+        y = (p.y - self.bottom) * magn + self.OFFSET
+        return Vector(x, y)
+
+    def _add_axis(self) -> None:
+        self.draw_segment(Segment(Vector(self.bottom, 0), Vector(self.top, 0)), width=3)
+        self.draw_segment(Segment(Vector(0, self.bottom), Vector(0, self.top)), width=3)
+
+    def _add_grid(self, grid: int) -> None:
+        for i in range(0, self.top + 1, grid):
+            self.draw_segment(Segment(Vector(i, self.bottom), Vector(i, self.top)))
+            self.draw_segment(Segment(Vector(self.bottom, i), Vector(self.top, i)))
+        for i in range(0, self.bottom - 1, -grid):
+            self.draw_segment(Segment(Vector(i, self.bottom), Vector(i, self.top)))
+            self.draw_segment(Segment(Vector(self.bottom, i), Vector(self.top, i)))
+
+    def draw_point(self, p: Vector, size=None, color=(0, 0, 0)) -> None:
+        self._check_point(p)
+        if size is None:
+            size = self.SIZE / 150
+        center = self._convert(p)
+        self.draw.ellipse(
+            (center.x - size, center.y - size, center.x + size, center.y + size),
+            fill=color,
+        )
+
+    def draw_segment(self, segment: Segment, width=1, color=(200, 200, 200)) -> None:
+        p1 = self._convert(segment.p1)
+        p2 = self._convert(segment.p2)
+        self.draw.line((p1.x, p1.y, p2.x, p2.y), fill=color, width=width)
+
+    def draw_circle(self, circle: Circle, color=(0, 0, 0)) -> None:
+        lb = self._convert(circle.center - Vector(circle.radius, circle.radius))
+        rt = self._convert(circle.center + Vector(circle.radius, circle.radius))
+        self.draw.ellipse(
+            (lb.x, lb.y, rt.x, rt.y),
+            outline=color,
+        )
+
+    def save(self, path: str = "./pillow_image.jpg") -> None:
+        from PIL import ImageOps
+
+        ImageOps.flip(self.im).save(path, quality=95)
