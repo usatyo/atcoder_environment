@@ -1,9 +1,9 @@
+from typing import Union
 from collections import deque
 from math import atan2, cos, pi, sin
 
-EPS = 1e-8
-SCALE = 10**5
-DIGITS = 10
+EPS = 1e-8  # 許容誤差
+DIGITS = 10  # 出力で表示する桁数
 
 
 def equal(a, b):
@@ -89,10 +89,10 @@ class Vector:
         """
         if origin is None:
             origin = Vector(0, 0)
-        self = self - origin
+        relative = self - origin
         return origin + Vector(
-            self.x * cos(theta) - self.y * sin(theta),
-            self.x * sin(theta) + self.y * cos(theta),
+            relative.x * cos(theta) - relative.y * sin(theta),
+            relative.x * sin(theta) + relative.y * cos(theta),
         )
 
     def square_norm(self) -> float:
@@ -128,22 +128,17 @@ class Vector:
         return self / abs(self)
 
 
-class Segment:
+class Line:
     def __init__(self, p1: Vector, p2: Vector) -> None:
+        assert p1 != p2, "p1 and p2 must be different"
         self.p1 = p1.copy()
         self.p2 = p2.copy()
-
-    def __abs__(self) -> float:
-        return abs(self.p2 - self.p1)
 
     def __str__(self) -> str:
         return f"{self.p1} {self.p2}"
 
     def format(self) -> str:
         return f"{self.p1.format()} -- {self.p2.format()}"
-
-    def to_vector(self) -> Vector:
-        return self.p2 - self.p1
 
     def coef(self) -> float:
         """傾き
@@ -165,7 +160,7 @@ class Segment:
         Returns:
             Vector: 移動後の座標
         """
-        base = self.to_vector()
+        base = self.p2 - self.p1
         return self.p1 + base * (p - self.p1).dot(base) / base.square_norm()
 
     def reflection(self, p: Vector) -> Vector:
@@ -179,6 +174,105 @@ class Segment:
         """
         return p + (self.projection(p) - p) * 2
 
+    def is_parallel(self, other: "Line") -> bool:
+        """平行かどうか判定
+
+        Args:
+            other (Line): 比較対象の直線
+
+        Returns:
+            bool: True: 平行, False: 平行でない
+        """
+        return equal((self.p2 - self.p1).cross(other.p2 - other.p1), 0)
+
+    def is_orthogonal(self, other: "Line") -> bool:
+        """垂直かどうか判定
+
+        Args:
+            other (Line): 比較対象の直線
+
+        Returns:
+            bool: True: 垂直, False: 垂直でない
+        """
+        return equal((self.p2 - self.p1).dot(other.p2 - other.p1), 0)
+
+    def is_contain_point(self, p: Vector) -> bool:
+        """直線上に点 p が存在するかどうか
+
+        Args:
+            p (Vector): 判定対象の点
+
+        Returns:
+            bool: True: 直線上に存在, False: 直線上に存在しない
+        """
+        if self.p1 == p or self.p2 == p:
+            return True
+        return (self.p2 - self.p1).ccw(p - self.p1) == 0
+
+    def is_crossing(self, other: Union["Line", "Segment"]) -> bool:
+        """直線の交差判定
+
+        Args:
+            other (Line | Segment): 判定対象の直線または線分
+
+        Returns:
+            bool: True: 交差, False: 交差しない
+        """
+        if type(other) == Line:
+            return self._is_crossing_line(other)
+        if type(other) == Segment:
+            return self._is_crossing_segment(other)
+        raise ValueError("invalid type")
+
+    def _is_crossing_line(self, other: "Line") -> bool:
+        if self.is_contain_point(other.p1):
+            return True
+        return not self.is_parallel(other)
+
+    def _is_crossing_segment(self, other: "Segment") -> bool:
+        if self.is_contain_point(other.p1) or self.is_contain_point(other.p2):
+            return True
+        ccw1 = (self.p2 - self.p1).ccw(other.p1 - self.p1)
+        ccw2 = (self.p2 - self.p1).ccw(other.p2 - self.p1)
+        return ccw1 * ccw2 < 0
+
+    def crossing_point(self, other: Union["Line", "Segment"]) -> Union[Vector, None]:
+        """他の直線との交点
+
+        Args:
+            other (Line | Segment): 対象の直線または線分
+
+        Returns:
+            Vector | None: 交点の座標. 交差しない場合は None. 平行な場合も None
+        """
+        if self.is_parallel(other) or not self.is_crossing(other):
+            return None
+        d1 = (self.p2 - self.p1).cross(other.p2 - other.p1)
+        d2 = (self.p2 - self.p1).cross(self.p2 - other.p1)
+        if equal(d1, 0) and equal(d2, 0):
+            return other.p1
+        return other.p1 + (other.p2 - other.p1) * (d2 / d1)
+
+    def distance_to_point(self, p: Vector) -> float:
+        """直線と点の距離
+
+        Args:
+            p (Vector): 対象の点
+
+        Returns:
+            float: 距離
+        """
+        projection = self.projection(p)
+        return abs(p - projection)
+
+
+class Segment(Line):
+    def __init__(self, p1: Vector, p2: Vector) -> None:
+        super().__init__(p1, p2)
+
+    def __abs__(self) -> float:
+        return abs(self.p2 - self.p1)
+
     def bisecter(self) -> "Segment":
         """垂直二等分線
 
@@ -190,28 +284,6 @@ class Segment:
         p2 = self.p2.rotate(pi / 2, center)
         return Segment(p1, p2)
 
-    def is_parallel(self, other: "Segment") -> bool:
-        """平行かどうか判定
-
-        Args:
-            other (Segment): 比較対象の線分
-
-        Returns:
-            bool: True: 平行, False: 平行でない
-        """
-        return equal(self.to_vector().cross(other.to_vector()), 0)
-
-    def is_orthogonal(self, other: "Segment") -> bool:
-        """ "垂直かどうか判定
-
-        Args:
-            other (Segment): 比較対象の線分
-
-        Returns:
-            bool: True: 垂直, False: 垂直でない
-        """
-        return equal(self.to_vector().dot(other.to_vector()), 0)
-
     def is_contain_point(self, p: Vector) -> bool:
         """線分上に点 p が存在するかどうか
 
@@ -221,27 +293,29 @@ class Segment:
         Returns:
             bool: True: 線分上に存在, False: 線分上に存在しない
         """
-        if self.p1 == p or self.p2 == p:
-            return True
-        if self.p1 == self.p2:
-            return False
-        onLine = self.to_vector().ccw(p - self.p1) == 0
-        between = (
-            -EPS
-            < self.to_vector().dot(p - self.p1)
-            < self.to_vector().square_norm() + EPS
-        )
-        return onLine and between
+        ref = (self.p2 - self.p1).dot(p - self.p1) / abs(self)
+        between = equal(ref, 0) or equal(ref, 1) or 0 < ref < 1
+        return super().is_contain_point(p) and between
 
-    def is_crossing(self, other: "Segment") -> bool:
+    def is_crossing(self, other: Union["Line", "Segment"]):
         """線分の交差判定
 
         Args:
-            other (Segment): 判定対象の線分
+            other (Line | Segment): 判定対象の直線または線分
 
         Returns:
             bool: True: 交差, False: 交差しない
         """
+        if type(other) == Line:
+            return super()._is_crossing_line(other)
+        if type(other) == Segment:
+            return super()._is_crossing_segment(other)
+        raise ValueError("invalid type")
+
+    def _is_crossing_line(self, other: "Line"):
+        return other._is_crossing_line(self)
+
+    def _is_crossing_segment(self, other: "Segment"):
         if (
             self.is_contain_point(other.p1)
             or self.is_contain_point(other.p2)
@@ -250,43 +324,25 @@ class Segment:
         ):
             return True
 
-        return self.to_vector().ccw(other.p1 - self.p1) != self.to_vector().ccw(
-            other.p2 - self.p1
-        ) and other.to_vector().ccw(self.p1 - other.p1) != other.to_vector().ccw(
-            self.p2 - other.p1
-        )
+        ccw1 = (self.p2 - self.p1).ccw(other.p1 - self.p1)
+        ccw2 = (self.p2 - self.p1).ccw(other.p2 - self.p1)
+        ccw3 = (other.p2 - other.p1).ccw(self.p1 - other.p1)
+        ccw4 = (other.p2 - other.p1).ccw(self.p2 - other.p1)
+        return ccw1 != ccw2 and ccw3 != ccw4
 
-    def crossing_point(self, other: "Segment") -> Vector:
-        """線分同士の交点
-
-        Args:
-            other (Segment): 対象の線分
-
-        Returns:
-            Vector: 交点の座標. 交差しない場合は None
-        """
-        if self.is_parallel(other) or not self.is_crossing(other):
-            return None
-        d1 = self.to_vector().cross(other.to_vector())
-        d2 = self.to_vector().cross(self.p2 - other.p1)
-        if equal(d1, 0) and equal(d2, 0):
-            return other.p1
-        return other.p1 + other.to_vector() * (d2 / d1)
-
-    def distance_to_point(self, p: Vector, line=False) -> float:
+    def distance_to_point(self, p: Vector) -> float:
         """線分と点の距離
 
         Args:
             p (Vector): 対象の点
-            line (bool, optional): 直線に変更する場合 True. Defaults to False.
 
         Returns:
             float: 距離
         """
         projection = self.projection(p)
-        if line or self.is_contain_point(projection):
+        if self.is_contain_point(projection):
             return abs(p - projection)
-        return min(abs(p - self.p1), abs(p - self.p2))
+        return min(abs(self.p1 - p), abs(self.p2 - p))
 
     def distance_to_segment(self, other: "Segment") -> float:
         """線分と線分の距離
@@ -309,7 +365,7 @@ class Segment:
 
 class Polygon:
     def __init__(self, points: list[Vector]) -> None:
-        """初期化
+        """自己交差を含まない多角形
 
         Args:
             points (list[Vector]): 頂点を反時計回りに追加したリスト
@@ -371,11 +427,11 @@ class Polygon:
             theta += atan2((a - p).cross(b - p), (a - p).dot(b - p))
         return -1 if equal(theta, 0) else 1
 
-    def construct_convex_hull(self) -> int:
-        """現在 self に含まれている点から凸包を構成し、自身を置き換える
+    def convex_hull(self) -> "Polygon":
+        """現在 self に含まれている点から構成される凸包を返す
 
         Returns:
-            int: 凸包の頂点数
+            Polygon: 生成された凸包
         """
         points = self.points
         points.sort(key=lambda p: (p.y, p.x))
@@ -425,9 +481,7 @@ class Polygon:
 
         right.pop()
         left.pop()
-        self.points = list(right) + list(left)
-        self.n = len(self.points)
-        return self.n
+        return Polygon(list(right) + list(left))
 
     def diameter(self) -> float:
         """多角形の直径（最遠点対）
@@ -435,57 +489,58 @@ class Polygon:
         Returns:
             float: 直径
         """
-        self.construct_convex_hull()
-        if self.n == 2:
-            return abs(self.points[0] - self.points[1])
+        ch = self.convex_hull()
+        if ch.n == 2:
+            return abs(ch.points[0] - ch.points[1])
         i = j = 0
-        for k in range(self.n):
-            if self.points[k].x < self.points[i].x:
+        for k in range(ch.n):
+            if ch.points[k].x < ch.points[i].x:
                 i = k
-            if self.points[k].x > self.points[j].x:
+            if ch.points[k].x > ch.points[j].x:
                 j = k
         res = 0
         si, sj = i, j
         while i != sj or j != si:
-            res = max(res, abs(self.points[i] - self.points[j]))
-            vi = self.points[(i + 1) % self.n] - self.points[i]
-            vj = self.points[(j + 1) % self.n] - self.points[j]
+            res = max(res, abs(ch.points[i] - ch.points[j]))
+            vi = ch.points[(i + 1) % ch.n] - ch.points[i]
+            vj = ch.points[(j + 1) % ch.n] - ch.points[j]
             if vi.cross(vj) < 0:
-                i = (i + 1) % self.n
+                i = (i + 1) % ch.n
             else:
-                j = (j + 1) % self.n
+                j = (j + 1) % ch.n
 
         return res
 
     def common_polygon(self, other: "Polygon") -> "Polygon":
-        """多角形同士の共通部分
+        """凸多角形同士の共通部分
 
         Args:
             other (Polygon): もう片方の凸多角形
         """
-        self.construct_convex_hull()
-        other.construct_convex_hull()
+        ch_self = self.convex_hull()
+        ch_other = other.convex_hull()
 
         points = []
 
-        for p in self.points:
-            if other.is_inside(p) == 1:
+        for p in ch_self.points:
+            if ch_other.is_inside(p) == 1:
                 points.append(p)
 
-        for p in other.points:
-            if self.is_inside(p) == 1:
+        for p in ch_other.points:
+            if ch_self.is_inside(p) == 1:
                 points.append(p)
 
-        for i in range(self.n):
-            seg1 = Segment(self.points[i], self.points[(i + 1) % self.n])
-            for j in range(other.n):
-                seg2 = Segment(other.points[j], other.points[(j + 1) % other.n])
+        for i in range(ch_self.n):
+            seg1 = Segment(ch_self.points[i], ch_self.points[(i + 1) % ch_self.n])
+            for j in range(ch_other.n):
+                seg2 = Segment(
+                    ch_other.points[j], ch_other.points[(j + 1) % ch_other.n]
+                )
                 if seg1.is_crossing(seg2):
                     points.append(seg1.crossing_point(seg2))
 
         polygon = Polygon(points)
-        polygon.construct_convex_hull()
-        return polygon
+        return polygon.convex_hull()
 
 
 class Circle:
@@ -603,7 +658,7 @@ class Circle:
         if self.is_touching_line(other):
             return [projection]
         dist = abs(projection - self.center)
-        unit = other.to_vector().unit_vector()
+        unit = (other.p2 - other.p1).unit_vector()
         d = (self.radius**2 - dist**2) ** 0.5
         return [projection + unit * d, projection - unit * d]
 
@@ -655,7 +710,6 @@ class PillowManager:
             self.draw_segment(parallel_y, color=(200, 200, 200))
 
     def draw_point(self, p: Vector, size=None, color=(0, 0, 0)) -> None:
-        self._check_point(p)
         if size is None:
             size = self.SIZE / 150
         center = self._convert(p)

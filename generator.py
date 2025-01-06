@@ -9,16 +9,10 @@ class Generator:
         return info
 
     def _make_sample(self):
-        n = randint(1, 10)
+        n = randint(1, 10**10)
         self.file.write(f"{n}\n")
-        xys = []
-        for _ in range(n):
-            x = randint(-10, 10)
-            y = randint(-10, 10)
-            self.file.write(f"{x} {y}\n")
-            xys.append((x, y))
         # self.file.write(f"{' '.join(map(str, a))}\n")
-        return n, xys
+        return n
 
     def _simple_graph(self, n, m):
         assert 0 <= m <= n * (n - 1) // 2

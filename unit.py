@@ -1,4 +1,4 @@
-from answer import main
+from answer import check, main
 from honesty import honesty
 from generator import Generator
 import unittest
@@ -17,7 +17,7 @@ class Test(unittest.TestCase):
         honest = honesty()
         self.assertEqual(ans, honest, msg=f"\nYour Value: {ans}\nTrue Value: {honest}")
 
-    def test_multiple_cases(self):
+    def _test_multiple_cases(self):
         gen = Generator()
         for _ in range(LOOP):
             info = gen.generate()
@@ -30,20 +30,22 @@ class Test(unittest.TestCase):
                     ans, honest, msg=f"\nYour Value: {ans}\nTrue Value: {honest}"
                 )
 
-    def _test_satisfy_conditions(self):
+    def test_satisfy_conditions(self):
         gen = Generator()
         for _ in range(LOOP):
             info = gen.generate()
             file = open("input.txt", "r")
-            ans = main(lambda: file.readline().rstrip())
+            ans = int(main(lambda: file.readline().rstrip()))
             file.close()
 
             file = open("input.txt", "r")
-            r, x, y = map(int, file.readline().split())
+            n = int(file.readline().rstrip())
             file.close()
 
             with self.subTest(info=info):
-                self.assertTrue(x == y)
+                self.assertTrue(n <= ans < n * 2, "range error")
+                self.assertTrue(check(ans))
+                self.assertTrue(check(ans + 1))
 
 
 if __name__ == "__main__":
