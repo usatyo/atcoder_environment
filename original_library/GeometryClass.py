@@ -294,7 +294,7 @@ class Segment(Line):
             bool: True: 線分上に存在, False: 線分上に存在しない
         """
         ref = (self.p2 - self.p1).dot(p - self.p1) / abs(self)
-        between = equal(ref, 0) or equal(ref, 1) or 0 < ref < 1
+        between = equal(ref, 0) or equal(ref, abs(self)) or 0 < ref < abs(self)
         return super().is_contain_point(p) and between
 
     def is_crossing(self, other: Union["Line", "Segment"]):
@@ -380,7 +380,7 @@ class Polygon:
         return " -> ".join([p.format() for p in self.points])
 
     def area(self) -> float:
-        """多角形内部の面積
+        """多角形内部の面積. O(self.n)
 
         Returns:
             float: 面積
@@ -393,7 +393,7 @@ class Polygon:
         return abs(area)
 
     def is_convex(self) -> bool:
-        """凸多角形かどうか判定
+        """凸多角形かどうか判定. O(self.n)
 
         Returns:
             bool: True: 凸多角形, False: 凹多角形. 3点が一直線上にある場合も True
@@ -409,7 +409,7 @@ class Polygon:
         return not (top == 1 and bottom == -1)
 
     def is_inside(self, p: Vector) -> int:
-        """多角形と点の位置関係を判定
+        """多角形と点の位置関係を判定. O(self.n)
 
         Args:
             p (Vector): 判定対象の点
@@ -428,7 +428,7 @@ class Polygon:
         return -1 if equal(theta, 0) else 1
 
     def convex_hull(self) -> "Polygon":
-        """現在 self に含まれている点から構成される凸包を返す
+        """現在 self に含まれている点から構成される凸包を返す. O(self.n)
 
         Returns:
             Polygon: 生成された凸包
@@ -484,7 +484,7 @@ class Polygon:
         return Polygon(list(right) + list(left))
 
     def diameter(self) -> float:
-        """多角形の直径（最遠点対）
+        """多角形の直径（最遠点対）. O(self.n)
 
         Returns:
             float: 直径
@@ -511,8 +511,8 @@ class Polygon:
 
         return res
 
-    def common_polygon(self, other: "Polygon") -> "Polygon":
-        """凸多角形同士の共通部分
+    def convex_common(self, other: "Polygon") -> "Polygon":
+        """凸多角形同士の共通部分. O(self.n * other.n)
 
         Args:
             other (Polygon): もう片方の凸多角形
@@ -542,6 +542,54 @@ class Polygon:
         polygon = Polygon(points)
         return polygon.convex_hull()
 
+    def convex_cut_line(self, other: Line) -> "Polygon":
+        """凸多角形を直線で切断. O(self.n)
+
+        Args:
+            other (Line): 切断する直線
+
+        Returns:
+            Polygon: 切断後の反時計周り側の凸多角形
+        """
+        points = []
+        for i in range(self.n):
+            if (other.p2 - other.p1).ccw(self.points[i] - other.p1) != -1:
+                points.append(self.points[i])
+            seg = Segment(self.points[i], self.points[(i + 1) % self.n])
+            if (self.points[i] - other.p1).ccw(other.p2 - other.p1) * (
+                self.points[(i + 1) % self.n] - other.p1
+            ).ccw(other.p2 - other.p1) < 0:
+                points.append(seg.crossing_point(other))
+        return Polygon(points).convex_hull()
+
+    def area_common_with_circle(self, other: "Circle") -> float:
+        """円と多角形の共通部分の面積
+
+        Args:
+            other (Circle): 対象の円
+
+        Returns:
+            float: 共通部分の面積
+        """
+        area = 0
+        points = []
+        for i in range(self.n):
+            points.append(self.points[i])
+            seg = Segment(self.points[i], self.points[(i + 1) % self.n])
+            for p in other.crossing_points_line(seg):
+                if seg.is_contain_point(p) and p != seg.p1 and p != seg.p2:
+                    points.append(p)
+        for i in range(len(points)):
+            seg = Segment(points[i], points[(i + 1) % len(points)])
+            dot = (seg.p1 - other.center).dot(seg.p2 - other.center)
+            cross = (seg.p1 - other.center).cross(seg.p2 - other.center)
+            if other.is_inside(seg.p1) == -1 or other.is_inside(seg.p2) == -1:
+                theta = atan2(cross, dot)
+                area += other.radius**2 * theta / 2
+            else:
+                area += cross / 2
+        return abs(area)
+
 
 class Circle:
     def __init__(self, center: Vector, radius: float) -> None:
@@ -554,6 +602,28 @@ class Circle:
 
     def format(self) -> str:
         return f"o: {self.center.format()}, r: {self.radius:.{DIGITS}f}"
+
+    def area(self) -> float:
+        """円の面積
+
+        Returns:
+            float: 面積
+        """
+        return pi * self.radius**2
+
+    def is_inside(self, p: Vector) -> int:
+        """円と点の位置関係を判定.
+
+        Args:
+            p (Vector): 判定対象の点
+
+        Returns:
+            int: 1: 内部, 0: 線上, -1: 外部
+        """
+        dist = abs(self.center - p)
+        if equal(dist, self.radius):
+            return 0
+        return 1 if dist < self.radius else -1
 
     def is_touching_circle(self, other: "Circle") -> int:
         """円が接しているかどうかを判定
@@ -619,11 +689,11 @@ class Circle:
         else:
             return []
 
-    def is_touching_line(self, other: Segment) -> bool:
+    def is_touching_line(self, other: Line) -> bool:
         """直線と円が接しているかどうかを判定
 
         Args:
-            other (Segment): 対象の直線
+            other (Line): 対象の直線
 
         Returns:
             bool: True: 接している, False: 接していない
@@ -643,7 +713,7 @@ class Circle:
             return False
         return other.distance_to_point(self.center) < self.radius
 
-    def crossing_points_Line(self, other: Line) -> list[Vector]:
+    def crossing_points_line(self, other: Line) -> list[Vector]:
         """直線と円の交点
 
         Args:
@@ -660,7 +730,18 @@ class Circle:
         dist = abs(projection - self.center)
         unit = (other.p2 - other.p1).unit_vector()
         d = (self.radius**2 - dist**2) ** 0.5
-        return [projection + unit * d, projection - unit * d]
+        return [projection - unit * d, projection + unit * d]
+
+    def area_common_with_polygon(self, other: Polygon) -> float:
+        """多角形との共通部分の面積
+
+        Args:
+            other (Polygon): 対象の多角形
+
+        Returns:
+            float: 共通部分の面積
+        """
+        return other.area_common_with_circle(self)
 
 
 class PillowManager:
@@ -722,6 +803,12 @@ class PillowManager:
         p1 = self._convert(segment.p1)
         p2 = self._convert(segment.p2)
         self.draw.line((p1.x, p1.y, p2.x, p2.y), fill=color, width=width)
+
+    def draw_polygon(self, polygon: Polygon, width=1, color=(0, 0, 0)) -> None:
+        for i in range(polygon.n):
+            p1 = polygon.points[i]
+            p2 = polygon.points[(i + 1) % polygon.n]
+            self.draw_segment(Segment(p1, p2), width, color)
 
     def draw_circle(self, circle: Circle, color=(0, 0, 0)) -> None:
         lb = self._convert(circle.center - Vector(circle.radius, circle.radius))

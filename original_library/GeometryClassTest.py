@@ -125,8 +125,12 @@ class TestBasicGeometry(unittest.TestCase):
         p2 = Polygon([Vector(0, 0), Vector(1, 0), Vector(1, 1), Vector(0, 1)])
         self.assertAlmostEqual(p2.diameter(), 1.414213562373)
 
-    def _test_4_C_Convex_Cut(self):
-        pass
+    def test_4_C_Convex_Cut(self):
+        p = Polygon([Vector(1, 1), Vector(4, 1), Vector(4, 3), Vector(1, 3)])
+        l1 = Line(Vector(2, 0), Vector(2, 4))
+        self.assertAlmostEqual(p.convex_cut_line(l1).area(), 2)
+        l2 = Line(Vector(2, 4), Vector(2, 0))
+        self.assertAlmostEqual(p.convex_cut_line(l2).area(), 4)
 
     def test_7_A_Intersection(self):
         self.assertEqual(
@@ -160,20 +164,20 @@ class TestBasicGeometry(unittest.TestCase):
             Circle(Vector(0, 0), 1).is_touching_circle(Circle(Vector(0, 0), 2)), 0
         )
 
-    def _test_7_B_Incircle_of_a_Triangle(self):
+    def test_7_B_Incircle_of_a_Triangle(self):
         pass
 
-    def _test_7_C_Circumcircle_of_a_Triangle(self):
+    def test_7_C_Circumcircle_of_a_Triangle(self):
         pass
 
     def test_7_D_CrossPoint_of_Cirle_and_Line(self):
         c = Circle(Vector(2, 1), 1)
-        p1, p2 = c.crossing_points_Line(Line(Vector(0, 1), Vector(4, 1)))
+        p1, p2 = c.crossing_points_line(Line(Vector(0, 1), Vector(4, 1)))
         self.assertTrue(
             (p1 == Vector(3, 1) and p2 == Vector(1, 1))
             or (p1 == Vector(1, 1) and p2 == Vector(3, 1))
         )
-        p3 = c.crossing_points_Line(Line(Vector(3, 0), Vector(3, 3)))[0]
+        p3 = c.crossing_points_line(Line(Vector(3, 0), Vector(3, 3)))[0]
         self.assertEqual(p3, Vector(3, 1))
 
     def test_7_E_CrossPoint_of_Circles(self):
@@ -188,8 +192,17 @@ class TestBasicGeometry(unittest.TestCase):
         p3 = c.crossing_points_circle(c2)[0]
         self.assertEqual(p3, Vector(0, 2))
 
-    def _test_7_F_Tangent_to_Circle(self):
+    def test_7_F_Tangent_to_Circle(self):
         pass
+
+    def test_7_H_Intersection_of_Circle_and_Polygon(self):
+        c = Circle(Vector(0, 0), 5)
+        p1 = Polygon([Vector(1, 1), Vector(4, 1), Vector(5, 5)])
+        self.assertAlmostEqual(c.area_common_with_polygon(p1), 4.639858417607)
+        self.assertAlmostEqual(p1.area_common_with_circle(c), 4.639858417607)
+        p2 = Polygon([Vector(0, 0), Vector(-3, -6), Vector(1, -3), Vector(5, -4)])
+        self.assertAlmostEqual(c.area_common_with_polygon(p2), 11.787686807576)
+        self.assertAlmostEqual(p2.area_common_with_circle(c), 11.787686807576)
 
 
 if __name__ == "__main__":
