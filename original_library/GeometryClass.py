@@ -437,11 +437,11 @@ class Polygon:
         points.sort(key=lambda p: (p.y, p.x))
 
         if self.n <= 2:
-            return 2
+            return Polygon(points)
         elif self.n == 3:
             if (points[1] - points[0]).ccw(points[2] - points[0]) < 0:
-                self.points = [points[0], points[2], points[1]]
-            return 3
+                points = [points[0], points[2], points[1]]
+            return Polygon(points)
 
         right = deque([points[0].copy(), points[1].copy()])
         for i in range(2, self.n):
@@ -574,16 +574,16 @@ class Circle:
             return 0
 
     def is_crossing_circle(self, other: "Circle") -> bool:
-        """円が交差しているかどうかを判定
+        """円同士が交点を持つかどうかを判定
 
         Args:
             other (Circle): もう片方の円
 
         Returns:
-            bool: True: 交差, False: 交差しない
+            bool: True: 交点を持つ, False: 交点を持たない
         """
         if self.is_touching_circle(other):
-            return False
+            return True
         elif abs(self.center - other.center) < abs(self.radius - other.radius):
             return False
         elif self.radius + other.radius < abs(self.center - other.center):
@@ -628,9 +628,9 @@ class Circle:
         Returns:
             bool: True: 接している, False: 接していない
         """
-        return equal(other.distance_to_point(self.center, line=True), self.radius)
+        return equal(other.distance_to_point(self.center), self.radius)
 
-    def is_crossing_line(self, other: Segment) -> bool:
+    def is_crossing_line(self, other: Line) -> bool:
         """直線と円が2点以上で交わるかどうかを判定
 
         Args:
@@ -641,9 +641,9 @@ class Circle:
         """
         if self.is_touching_line(other):
             return False
-        return other.distance_to_point(self.center, line=True) < self.radius
+        return other.distance_to_point(self.center) < self.radius
 
-    def crossing_points_segment(self, other: Segment) -> list[Vector]:
+    def crossing_points_Line(self, other: Line) -> list[Vector]:
         """直線と円の交点
 
         Args:
