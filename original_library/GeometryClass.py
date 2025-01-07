@@ -294,7 +294,7 @@ class Segment(Line):
         between = equal(ref, 0) or equal(ref, abs(self)) or 0 < ref < abs(self)
         return super().is_including_point(p) and between
 
-    def is_crossing(self, other: Union["Line", "Segment"]):
+    def is_crossing(self, other: Union["Line", "Segment"]) -> bool:
         """線分の交差判定
 
         Args:
@@ -309,10 +309,10 @@ class Segment(Line):
             return super()._is_crossing_segment(other)
         raise ValueError("invalid type")
 
-    def _is_crossing_line(self, other: "Line"):
+    def _is_crossing_line(self, other: "Line") -> bool:
         return other._is_crossing_line(self)
 
-    def _is_crossing_segment(self, other: "Segment"):
+    def _is_crossing_segment(self, other: "Segment") -> bool:
         if (
             self.is_including_point(other.p1)
             or self.is_including_point(other.p2)
