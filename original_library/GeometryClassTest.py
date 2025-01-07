@@ -98,9 +98,9 @@ class TestBasicGeometry(unittest.TestCase):
 
     def test_3_C_Polygon_Point_Containment(self):
         p1 = Polygon([Vector(0, 0), Vector(3, 1), Vector(2, 3), Vector(0, 3)])
-        self.assertEqual(p1.is_inside(Vector(2, 1)), 1)
-        self.assertEqual(p1.is_inside(Vector(0, 2)), 0)
-        self.assertEqual(p1.is_inside(Vector(3, 2)), -1)
+        self.assertEqual(p1.state_point(Vector(2, 1)), 1)
+        self.assertEqual(p1.state_point(Vector(0, 2)), 0)
+        self.assertEqual(p1.state_point(Vector(3, 2)), -1)
 
     def test_4_A_Convex_Hull(self):
         p = Polygon(
@@ -165,10 +165,42 @@ class TestBasicGeometry(unittest.TestCase):
         )
 
     def test_7_B_Incircle_of_a_Triangle(self):
-        pass
+        p1 = Vector(1, -2)
+        p2 = Vector(3, 2)
+        p3 = Vector(-2, 0)
+        l1 = Line(p1, p1 + ((p2 - p1).unit_vector() + (p3 - p1).unit_vector()) / 2)
+        l2 = Line(p2, p2 + ((p1 - p2).unit_vector() + (p3 - p2).unit_vector()) / 2)
+        center = l1.crossing_point(l2)
+        self.assertEqual(
+            center, Vector(0.53907943898209422325, -0.26437392711448356856)
+        )
+        self.assertAlmostEqual(
+            Line(p1, p2).distance_to_point(center), 1.18845545916395465278
+        )
+
+        p1 = Vector(0, 3)
+        p2 = Vector(4, 0)
+        p3 = Vector(0, 0)
+        l1 = Line(p1, p1 + ((p2 - p1).unit_vector() + (p3 - p1).unit_vector()) / 2)
+        l2 = Line(p2, p2 + ((p1 - p2).unit_vector() + (p3 - p2).unit_vector()) / 2)
+        center = l1.crossing_point(l2)
+        self.assertEqual(center, Vector(1, 1))
+        self.assertAlmostEqual(Line(p1, p2).distance_to_point(center), 1)
 
     def test_7_C_Circumcircle_of_a_Triangle(self):
-        pass
+        p1 = Vector(1, -2)
+        p2 = Vector(3, 2)
+        p3 = Vector(-2, 0)
+        center = Segment(p1, p2).bisecter().crossing_point(Segment(p2, p3).bisecter())
+        self.assertEqual(center, Vector(0.625, 0.6875))
+        self.assertAlmostEqual(abs(center - p1), 2.71353666826155124291)
+
+        p1 = Vector(0, 3)
+        p2 = Vector(4, 0)
+        p3 = Vector(0, 0)
+        center = Segment(p1, p2).bisecter().crossing_point(Segment(p2, p3).bisecter())
+        self.assertEqual(center, Vector(2, 1.5))
+        self.assertAlmostEqual(abs(center - p1), 2.5)
 
     def test_7_D_CrossPoint_of_Cirle_and_Line(self):
         c = Circle(Vector(2, 1), 1)

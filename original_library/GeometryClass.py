@@ -270,16 +270,16 @@ class Segment(Line):
     def __abs__(self) -> float:
         return abs(self.p2 - self.p1)
 
-    def bisecter(self) -> "Segment":
+    def bisecter(self) -> "Line":
         """垂直二等分線
 
         Returns:
-            Segment: 計算結果の線分
+            Line: 計算結果の直線
         """
         center = (self.p1 + self.p2) / 2
         p1 = self.p1.rotate(pi / 2, center)
         p2 = self.p2.rotate(pi / 2, center)
-        return Segment(p1, p2)
+        return Line(p1, p2)
 
     def is_including_point(self, p: Vector) -> bool:
         """線分上に点 p が存在するかどうか
@@ -405,7 +405,7 @@ class Polygon:
             bottom = min(bottom, (b - a).ccw(c - b))
         return not (top == 1 and bottom == -1)
 
-    def is_inside(self, p: Vector) -> int:
+    def state_point(self, p: Vector) -> int:
         """多角形と点の位置関係を判定. O(self.n)
 
         Args:
@@ -520,11 +520,11 @@ class Polygon:
         points = []
 
         for p in ch_self.points:
-            if ch_other.is_inside(p) == 1:
+            if ch_other.state_point(p) == 1:
                 points.append(p)
 
         for p in ch_other.points:
-            if ch_self.is_inside(p) == 1:
+            if ch_self.state_point(p) == 1:
                 points.append(p)
 
         for i in range(ch_self.n):
@@ -580,7 +580,7 @@ class Polygon:
             seg = Segment(points[i], points[(i + 1) % len(points)])
             dot = (seg.p1 - other.center).dot(seg.p2 - other.center)
             cross = (seg.p1 - other.center).cross(seg.p2 - other.center)
-            if other.is_inside(seg.p1) == -1 or other.is_inside(seg.p2) == -1:
+            if other.state_point(seg.p1) == -1 or other.state_point(seg.p2) == -1:
                 theta = atan2(cross, dot)
                 area += other.radius**2 * theta / 2
             else:
@@ -608,7 +608,7 @@ class Circle:
         """
         return pi * self.radius**2
 
-    def is_inside(self, p: Vector) -> int:
+    def state_point(self, p: Vector) -> int:
         """円と点の位置関係を判定.
 
         Args:
