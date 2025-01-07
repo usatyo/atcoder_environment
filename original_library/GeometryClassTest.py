@@ -2,6 +2,8 @@ import unittest
 from GeometryClass import Vector, Segment, Line, Polygon, Circle
 
 
+# https://onlinejudge.u-aizu.ac.jp/courses/library/4/CGL/all のサンプルケースのチェック.
+# 5_A, 6_A, 7_G は未対応.
 class TestBasicGeometry(unittest.TestCase):
     def test_1_A_Projection(self):
         l1 = Line(Vector(0, 0), Vector(3, 4))
@@ -132,6 +134,12 @@ class TestBasicGeometry(unittest.TestCase):
         l2 = Line(Vector(2, 4), Vector(2, 0))
         self.assertAlmostEqual(p.convex_cut_line(l2).area(), 4)
 
+    def test_5_A_Closest_Pair(self):
+        pass
+
+    def test_6_A_Manhattan_Geometry(self):
+        pass
+
     def test_7_A_Intersection(self):
         self.assertEqual(
             Circle(Vector(1, 1), 1).state_including_circle(Circle(Vector(6, 2), 2)), -1
@@ -225,6 +233,23 @@ class TestBasicGeometry(unittest.TestCase):
         self.assertEqual(p3, Vector(0, 2))
 
     def test_7_F_Tangent_to_Circle(self):
+        p = Vector(0, 0)
+        c = Circle(Vector(2, 2), 2)
+        p1, p2 = c.tangent_to_point(p)
+        self.assertTrue(
+            (p1 == Vector(0, 2) and p2 == Vector(2, 0))
+            or (p1 == Vector(2, 0) and p2 == Vector(0, 2))
+        )
+
+        p = Vector(-3, 0)
+        c = Circle(Vector(2, 2), 2)
+        p1, p2 = c.tangent_to_point(p)
+        self.assertTrue(
+            (p1 == Vector(0.6206896552, 3.4482758621) and p2 == Vector(2, 0))
+            or (p1 == Vector(2, 0) and p2 == Vector(0.6206896552, 3.4482758621))
+        )
+
+    def test_7_G_Common_Tangent(self):
         pass
 
     def test_7_H_Intersection_of_Circle_and_Polygon(self):

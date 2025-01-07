@@ -773,6 +773,23 @@ class Circle:
             tri2 = (p2 - other.center).cross(p1 - other.center) / 2
             return arc1 + arc2 + tri1 + tri2
 
+    def tangent_to_point(self, other: Vector) -> list[Vector]:
+        """other を通る接線の接点
+
+        Args:
+            other (Vector): 対象の点
+
+        Returns:
+            list[Vector]: 接点のリスト
+        """
+        if self.state_point(other) == 1:
+            return []
+        elif self.state_point(other) == 0:
+            return [other.copy()]
+        else:
+            radius = (abs(other - self.center) ** 2 - self.radius**2) ** 0.5
+            return self.crossing_points_circle(Circle(other, radius))
+
 
 class PillowManager:
     SIZE = 1000
