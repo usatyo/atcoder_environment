@@ -134,34 +134,34 @@ class TestBasicGeometry(unittest.TestCase):
 
     def test_7_A_Intersection(self):
         self.assertEqual(
-            Circle(Vector(1, 1), 1).is_crossing_circle(Circle(Vector(6, 2), 2)), False
+            Circle(Vector(1, 1), 1).state_including_circle(Circle(Vector(6, 2), 2)), -1
         )
         self.assertEqual(
-            Circle(Vector(1, 1), 1).is_touching_circle(Circle(Vector(6, 2), 2)), 0
+            Circle(Vector(1, 1), 1).state_touching_circle(Circle(Vector(6, 2), 2)), 0
         )
         self.assertEqual(
-            Circle(Vector(1, 2), 1).is_crossing_circle(Circle(Vector(4, 2), 2)), True
+            Circle(Vector(1, 2), 1).state_including_circle(Circle(Vector(4, 2), 2)), 0
         )
         self.assertEqual(
-            Circle(Vector(1, 2), 1).is_touching_circle(Circle(Vector(4, 2), 2)), -1
+            Circle(Vector(1, 2), 1).state_touching_circle(Circle(Vector(4, 2), 2)), -1
         )
         self.assertEqual(
-            Circle(Vector(1, 2), 1).is_crossing_circle(Circle(Vector(3, 2), 2)), True
+            Circle(Vector(1, 2), 1).state_including_circle(Circle(Vector(3, 2), 2)), 0
         )
         self.assertEqual(
-            Circle(Vector(1, 2), 1).is_touching_circle(Circle(Vector(3, 2), 2)), 0
+            Circle(Vector(1, 2), 1).state_touching_circle(Circle(Vector(3, 2), 2)), 0
         )
         self.assertEqual(
-            Circle(Vector(0, 0), 1).is_crossing_circle(Circle(Vector(1, 0), 2)), True
+            Circle(Vector(0, 0), 1).state_including_circle(Circle(Vector(1, 0), 2)), 0
         )
         self.assertEqual(
-            Circle(Vector(0, 0), 1).is_touching_circle(Circle(Vector(1, 0), 2)), 1
+            Circle(Vector(0, 0), 1).state_touching_circle(Circle(Vector(1, 0), 2)), 1
         )
         self.assertEqual(
-            Circle(Vector(0, 0), 1).is_crossing_circle(Circle(Vector(0, 0), 2)), False
+            Circle(Vector(0, 0), 1).state_including_circle(Circle(Vector(0, 0), 2)), 1
         )
         self.assertEqual(
-            Circle(Vector(0, 0), 1).is_touching_circle(Circle(Vector(0, 0), 2)), 0
+            Circle(Vector(0, 0), 1).state_touching_circle(Circle(Vector(0, 0), 2)), 0
         )
 
     def test_7_B_Incircle_of_a_Triangle(self):
@@ -203,6 +203,17 @@ class TestBasicGeometry(unittest.TestCase):
         p2 = Polygon([Vector(0, 0), Vector(-3, -6), Vector(1, -3), Vector(5, -4)])
         self.assertAlmostEqual(c.area_common_with_polygon(p2), 11.787686807576)
         self.assertAlmostEqual(p2.area_common_with_circle(c), 11.787686807576)
+
+    def test_7_I_Intersection_of_Circles(self):
+        c1 = Circle(Vector(0, 0), 1)
+        c2 = Circle(Vector(2, 0), 2)
+        self.assertAlmostEqual(c1.area_common_with_circle(c2), 1.40306643968573875104)
+        self.assertAlmostEqual(c2.area_common_with_circle(c1), 1.40306643968573875104)
+
+        c1 = Circle(Vector(1, 0), 1)
+        c2 = Circle(Vector(0, 0), 3)
+        self.assertAlmostEqual(c1.area_common_with_circle(c2), 3.14159265358979311600)
+        self.assertAlmostEqual(c2.area_common_with_circle(c1), 3.14159265358979311600)
 
 
 if __name__ == "__main__":

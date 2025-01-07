@@ -95,9 +95,6 @@ class Vector:
             relative.x * sin(theta) + relative.y * cos(theta),
         )
 
-    def square_norm(self) -> float:
-        return self.x**2 + self.y**2
-
     def copy(self) -> "Vector":
         return Vector(self.x, self.y)
 
@@ -161,7 +158,7 @@ class Line:
             Vector: 移動後の座標
         """
         base = self.p2 - self.p1
-        return self.p1 + base * (p - self.p1).dot(base) / base.square_norm()
+        return self.p1 + base * (p - self.p1).dot(base) / abs(base) ** 2
 
     def reflection(self, p: Vector) -> Vector:
         """反射
@@ -196,7 +193,7 @@ class Line:
         """
         return equal((self.p2 - self.p1).dot(other.p2 - other.p1), 0)
 
-    def is_contain_point(self, p: Vector) -> bool:
+    def is_including_point(self, p: Vector) -> bool:
         """直線上に点 p が存在するかどうか
 
         Args:
@@ -225,12 +222,12 @@ class Line:
         raise ValueError("invalid type")
 
     def _is_crossing_line(self, other: "Line") -> bool:
-        if self.is_contain_point(other.p1):
+        if self.is_including_point(other.p1):
             return True
         return not self.is_parallel(other)
 
     def _is_crossing_segment(self, other: "Segment") -> bool:
-        if self.is_contain_point(other.p1) or self.is_contain_point(other.p2):
+        if self.is_including_point(other.p1) or self.is_including_point(other.p2):
             return True
         ccw1 = (self.p2 - self.p1).ccw(other.p1 - self.p1)
         ccw2 = (self.p2 - self.p1).ccw(other.p2 - self.p1)
@@ -284,7 +281,7 @@ class Segment(Line):
         p2 = self.p2.rotate(pi / 2, center)
         return Segment(p1, p2)
 
-    def is_contain_point(self, p: Vector) -> bool:
+    def is_including_point(self, p: Vector) -> bool:
         """線分上に点 p が存在するかどうか
 
         Args:
@@ -295,7 +292,7 @@ class Segment(Line):
         """
         ref = (self.p2 - self.p1).dot(p - self.p1) / abs(self)
         between = equal(ref, 0) or equal(ref, abs(self)) or 0 < ref < abs(self)
-        return super().is_contain_point(p) and between
+        return super().is_including_point(p) and between
 
     def is_crossing(self, other: Union["Line", "Segment"]):
         """線分の交差判定
@@ -317,10 +314,10 @@ class Segment(Line):
 
     def _is_crossing_segment(self, other: "Segment"):
         if (
-            self.is_contain_point(other.p1)
-            or self.is_contain_point(other.p2)
-            or other.is_contain_point(self.p1)
-            or other.is_contain_point(self.p2)
+            self.is_including_point(other.p1)
+            or self.is_including_point(other.p2)
+            or other.is_including_point(self.p1)
+            or other.is_including_point(self.p2)
         ):
             return True
 
@@ -340,7 +337,7 @@ class Segment(Line):
             float: 距離
         """
         projection = self.projection(p)
-        if self.is_contain_point(projection):
+        if self.is_including_point(projection):
             return abs(p - projection)
         return min(abs(self.p1 - p), abs(self.p2 - p))
 
@@ -422,7 +419,7 @@ class Polygon:
         for i in range(self.n):
             a = self.points[i]
             b = self.points[(i + 1) % self.n]
-            if Segment(a, b).is_contain_point(p):
+            if Segment(a, b).is_including_point(p):
                 return 0
             theta += atan2((a - p).cross(b - p), (a - p).dot(b - p))
         return -1 if equal(theta, 0) else 1
@@ -577,7 +574,7 @@ class Polygon:
             points.append(self.points[i])
             seg = Segment(self.points[i], self.points[(i + 1) % self.n])
             for p in other.crossing_points_line(seg):
-                if seg.is_contain_point(p) and p != seg.p1 and p != seg.p2:
+                if seg.is_including_point(p) and p != seg.p1 and p != seg.p2:
                     points.append(p)
         for i in range(len(points)):
             seg = Segment(points[i], points[(i + 1) % len(points)])
@@ -625,7 +622,7 @@ class Circle:
             return 0
         return 1 if dist < self.radius else -1
 
-    def is_touching_circle(self, other: "Circle") -> int:
+    def state_touching_circle(self, other: "Circle") -> int:
         """円が接しているかどうかを判定
 
         Args:
@@ -634,32 +631,30 @@ class Circle:
         Returns:
             int: 1: 内接, 0: 接しない, -1: 外接
         """
-        if self.center == other.center:
-            return 0
-        elif equal(abs(self.center - other.center), abs(self.radius - other.radius)):
+        if equal(abs(self.center - other.center), abs(self.radius - other.radius)):
             return 1
         elif equal(abs(self.center - other.center), self.radius + other.radius):
             return -1
         else:
             return 0
 
-    def is_crossing_circle(self, other: "Circle") -> bool:
-        """円同士が交点を持つかどうかを判定
+    def state_including_circle(self, other: "Circle") -> int:
+        """円同士の関係を判定
 
         Args:
             other (Circle): もう片方の円
 
         Returns:
-            bool: True: 交点を持つ, False: 交点を持たない
+            int: 1: 内部, 0: 交点を持つ, -1: 外部
         """
-        if self.is_touching_circle(other):
-            return True
+        if self.state_touching_circle(other):
+            return 0
         elif abs(self.center - other.center) < abs(self.radius - other.radius):
-            return False
+            return 1
         elif self.radius + other.radius < abs(self.center - other.center):
-            return False
+            return -1
         else:
-            return True
+            return 0
 
     def crossing_points_circle(self, other: "Circle") -> list[Vector]:
         """円と円の交点
@@ -670,16 +665,16 @@ class Circle:
         Returns:
             list[Vector]: 0~2個の交点を含むリスト
         """
-        if self.is_touching_circle(other) == 1:
+        if self.state_touching_circle(other) == 1:
             unit = (other.center - self.center).unit_vector()
             if self.radius > other.radius:
                 return [self.center + unit * self.radius]
             else:
                 return [other.center - unit * other.radius]
-        elif self.is_touching_circle(other) == -1:
+        elif self.state_touching_circle(other) == -1:
             unit = (other.center - self.center).unit_vector()
             return [self.center + unit * self.radius]
-        elif self.is_crossing_circle(other):
+        elif self.state_including_circle(other) == 0:
             dist = abs(self.center - other.center)
             cosine = (self.radius**2 - other.radius**2 + dist**2) / (2 * dist)
             h = (self.radius**2 - cosine**2) ** 0.5
@@ -701,16 +696,16 @@ class Circle:
         return equal(other.distance_to_point(self.center), self.radius)
 
     def is_crossing_line(self, other: Line) -> bool:
-        """直線と円が2点以上で交わるかどうかを判定
+        """直線と円が交わるかどうかを判定
 
         Args:
             other (Segment): 対象の直線
 
         Returns:
-            bool: 2点以上で交わるかどうか
+            bool: True: 交わる, False: 交わらない
         """
         if self.is_touching_line(other):
-            return False
+            return True
         return other.distance_to_point(self.center) < self.radius
 
     def crossing_points_line(self, other: Line) -> list[Vector]:
@@ -742,6 +737,41 @@ class Circle:
             float: 共通部分の面積
         """
         return other.area_common_with_circle(self)
+
+    def area_common_with_circle(self, other: "Circle") -> float:
+        """円と円の共通部分の面積
+
+        Args:
+            other (Circle): 対象の円
+
+        Returns:
+            float: 共通部分の面積
+        """
+        if (
+            self.state_including_circle(other) == 1
+            or self.state_touching_circle(other) == 1
+        ):
+            return min(self.area(), other.area())
+        elif (
+            self.state_including_circle(other) == -1
+            or self.state_touching_circle(other) == -1
+        ):
+            return 0
+        else:
+            p1, p2 = self.crossing_points_circle(other)
+            theta1 = atan2(
+                (p1 - self.center).cross(other.center - self.center),
+                (p1 - self.center).dot(other.center - self.center),
+            )
+            theta2 = atan2(
+                (p1 - other.center).cross(self.center - other.center),
+                (p1 - other.center).dot(self.center - other.center),
+            )
+            arc1 = abs(self.radius**2 * theta1)
+            arc2 = abs(other.radius**2 * theta2)
+            tri1 = (p1 - self.center).cross(p2 - self.center) / 2
+            tri2 = (p2 - other.center).cross(p1 - other.center) / 2
+            return arc1 + arc2 + tri1 + tri2
 
 
 class PillowManager:
@@ -798,6 +828,19 @@ class PillowManager:
             (center.x - size, center.y - size, center.x + size, center.y + size),
             fill=color,
         )
+
+    def draw_line(self, line: Line, width=1, color=(0, 0, 0)) -> None:
+        lb = Vector(self.bottom, self.bottom)
+        lt = Vector(self.bottom, self.top)
+        rb = Vector(self.top, self.bottom)
+        rt = Vector(self.top, self.top)
+        if -1 < line.coef() < 1:
+            p1 = Line(lb, lt).crossing_point(line)
+            p2 = Line(rt, rb).crossing_point(line)
+        else:
+            p1 = Line(lb, rb).crossing_point(line)
+            p2 = Line(rt, lt).crossing_point(line)
+        self.draw_segment(Segment(p1, p2), width, color)
 
     def draw_segment(self, segment: Segment, width=1, color=(0, 0, 0)) -> None:
         p1 = self._convert(segment.p1)
