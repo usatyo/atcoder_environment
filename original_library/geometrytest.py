@@ -1,5 +1,5 @@
 import unittest
-from GeometryClass import Vector, Segment, Line, Polygon, Circle
+from geometry import Vector, Segment, Line, Polygon, Circle
 
 
 # https://onlinejudge.u-aizu.ac.jp/courses/library/4/CGL/all のサンプルケースのチェック.

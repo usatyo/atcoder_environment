@@ -137,7 +137,7 @@ class Line:
     def format(self) -> str:
         return f"{self.p1.format()} -- {self.p2.format()}"
 
-    def coef(self) -> float:
+    def slope(self) -> float:
         """傾き
 
         Returns:
@@ -422,7 +422,7 @@ class Polygon:
             if Segment(a, b).is_including_point(p):
                 return 0
             theta += atan2((a - p).cross(b - p), (a - p).dot(b - p))
-        return -1 if equal(theta, 0) else 1
+        return -1 if -pi < theta < pi else 1
 
     def convex_hull(self) -> "Polygon":
         """現在 self に含まれている点から構成される凸包を返す. O(self.n)
@@ -851,7 +851,7 @@ class PillowManager:
         lt = Vector(self.bottom, self.top)
         rb = Vector(self.top, self.bottom)
         rt = Vector(self.top, self.top)
-        if -1 < line.coef() < 1:
+        if -1 < line.slope() < 1:
             p1 = Line(lb, lt).crossing_point(line)
             p2 = Line(rt, rb).crossing_point(line)
         else:
