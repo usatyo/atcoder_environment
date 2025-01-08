@@ -5,4 +5,4 @@ input.txt
 /out/**
 /ac-library
 /memo/
-
+**/__pycache__/**
