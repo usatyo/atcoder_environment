@@ -796,6 +796,16 @@ class PillowManager:
     OFFSET = 0
 
     def __init__(self, bottom=0, top=500, axis=True, grid: int = None) -> None:
+        """可視化用クラス
+
+        Args:
+            bottom (int, optional): 座標の最小値. 2軸で共通 Defaults to 0.
+            top (int, optional): 座標の最大値. 2軸で共通. Defaults to 500.
+            axis (bool, optional): x=0, y=0 を強調するかどうか. Defaults to True.
+            grid (int, optional): 補助線の間隔. None なら表示なし. Defaults to None.
+        """
+        
+        # コメントアウトのみで提出可能にするため，pillow は初期化時に import
         from PIL import Image, ImageDraw
 
         self.im = Image.new(
