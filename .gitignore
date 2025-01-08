@@ -5,4 +5,5 @@ input.txt
 /out/**
 /ac-library
 /memo/
-**/__pycache__/**
+__pycache__/
+/usatyo-geometry
