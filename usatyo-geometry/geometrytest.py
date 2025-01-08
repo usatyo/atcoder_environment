@@ -100,9 +100,9 @@ class TestBasicGeometry(unittest.TestCase):
 
     def test_3_C_Polygon_Point_Containment(self):
         p1 = Polygon([Vector(0, 0), Vector(3, 1), Vector(2, 3), Vector(0, 3)])
-        self.assertEqual(p1.state_point(Vector(2, 1)), 1)
-        self.assertEqual(p1.state_point(Vector(0, 2)), 0)
-        self.assertEqual(p1.state_point(Vector(3, 2)), -1)
+        self.assertEqual(p1.side_of_point(Vector(2, 1)), 1)
+        self.assertEqual(p1.side_of_point(Vector(0, 2)), 0)
+        self.assertEqual(p1.side_of_point(Vector(3, 2)), -1)
 
     def test_4_A_Convex_Hull(self):
         p = Polygon(
@@ -130,9 +130,9 @@ class TestBasicGeometry(unittest.TestCase):
     def test_4_C_Convex_Cut(self):
         p = Polygon([Vector(1, 1), Vector(4, 1), Vector(4, 3), Vector(1, 3)])
         l1 = Line(Vector(2, 0), Vector(2, 4))
-        self.assertAlmostEqual(p.convex_cut_line(l1).area(), 2)
+        self.assertAlmostEqual(p.convex_cut_with_line(l1).area(), 2)
         l2 = Line(Vector(2, 4), Vector(2, 0))
-        self.assertAlmostEqual(p.convex_cut_line(l2).area(), 4)
+        self.assertAlmostEqual(p.convex_cut_with_line(l2).area(), 4)
 
     def test_5_A_Closest_Pair(self):
         pass
@@ -142,34 +142,35 @@ class TestBasicGeometry(unittest.TestCase):
 
     def test_7_A_Intersection(self):
         self.assertEqual(
-            Circle(Vector(1, 1), 1).state_including_circle(Circle(Vector(6, 2), 2)), -1
+            Circle(Vector(1, 1), 1).side_of_aparting_circle(Circle(Vector(6, 2), 2)),
+            -1,
         )
         self.assertEqual(
-            Circle(Vector(1, 1), 1).state_touching_circle(Circle(Vector(6, 2), 2)), 0
+            Circle(Vector(1, 1), 1).side_of_touching_circle(Circle(Vector(6, 2), 2)), 0
         )
         self.assertEqual(
-            Circle(Vector(1, 2), 1).state_including_circle(Circle(Vector(4, 2), 2)), 0
+            Circle(Vector(1, 2), 1).side_of_aparting_circle(Circle(Vector(4, 2), 2)), 0
         )
         self.assertEqual(
-            Circle(Vector(1, 2), 1).state_touching_circle(Circle(Vector(4, 2), 2)), -1
+            Circle(Vector(1, 2), 1).side_of_touching_circle(Circle(Vector(4, 2), 2)), -1
         )
         self.assertEqual(
-            Circle(Vector(1, 2), 1).state_including_circle(Circle(Vector(3, 2), 2)), 0
+            Circle(Vector(1, 2), 1).side_of_aparting_circle(Circle(Vector(3, 2), 2)), 0
         )
         self.assertEqual(
-            Circle(Vector(1, 2), 1).state_touching_circle(Circle(Vector(3, 2), 2)), 0
+            Circle(Vector(1, 2), 1).side_of_touching_circle(Circle(Vector(3, 2), 2)), 0
         )
         self.assertEqual(
-            Circle(Vector(0, 0), 1).state_including_circle(Circle(Vector(1, 0), 2)), 0
+            Circle(Vector(0, 0), 1).side_of_aparting_circle(Circle(Vector(1, 0), 2)), 0
         )
         self.assertEqual(
-            Circle(Vector(0, 0), 1).state_touching_circle(Circle(Vector(1, 0), 2)), 1
+            Circle(Vector(0, 0), 1).side_of_touching_circle(Circle(Vector(1, 0), 2)), 1
         )
         self.assertEqual(
-            Circle(Vector(0, 0), 1).state_including_circle(Circle(Vector(0, 0), 2)), 1
+            Circle(Vector(0, 0), 1).side_of_aparting_circle(Circle(Vector(0, 0), 2)), 1
         )
         self.assertEqual(
-            Circle(Vector(0, 0), 1).state_touching_circle(Circle(Vector(0, 0), 2)), 0
+            Circle(Vector(0, 0), 1).side_of_touching_circle(Circle(Vector(0, 0), 2)), 0
         )
 
     def test_7_B_Incircle_of_a_Triangle(self):
@@ -212,30 +213,30 @@ class TestBasicGeometry(unittest.TestCase):
 
     def test_7_D_CrossPoint_of_Cirle_and_Line(self):
         c = Circle(Vector(2, 1), 1)
-        p1, p2 = c.crossing_points_line(Line(Vector(0, 1), Vector(4, 1)))
+        p1, p2 = c.crossing_points_with_line(Line(Vector(0, 1), Vector(4, 1)))
         self.assertTrue(
             (p1 == Vector(3, 1) and p2 == Vector(1, 1))
             or (p1 == Vector(1, 1) and p2 == Vector(3, 1))
         )
-        p3 = c.crossing_points_line(Line(Vector(3, 0), Vector(3, 3)))[0]
+        p3 = c.crossing_points_with_line(Line(Vector(3, 0), Vector(3, 3)))[0]
         self.assertEqual(p3, Vector(3, 1))
 
     def test_7_E_CrossPoint_of_Circles(self):
         c = Circle(Vector(0, 0), 2)
         c1 = Circle(Vector(2, 0), 2)
-        p1, p2 = c.crossing_points_circle(c1)
+        p1, p2 = c.crossing_points_with_circle(c1)
         self.assertTrue(
             (p1 == Vector(1, -1.73205080) and p2 == Vector(1, 1.73205080))
             or (p1 == Vector(1, 1.73205080) and p2 == Vector(1, -1.73205080))
         )
         c2 = Circle(Vector(0, 3), 1)
-        p3 = c.crossing_points_circle(c2)[0]
+        p3 = c.crossing_points_with_circle(c2)[0]
         self.assertEqual(p3, Vector(0, 2))
 
     def test_7_F_Tangent_to_Circle(self):
         p = Vector(0, 0)
         c = Circle(Vector(2, 2), 2)
-        p1, p2 = c.tangent_to_point(p)
+        p1, p2 = c.touching_points_with_tangent(p)
         self.assertTrue(
             (p1 == Vector(0, 2) and p2 == Vector(2, 0))
             or (p1 == Vector(2, 0) and p2 == Vector(0, 2))
@@ -243,7 +244,7 @@ class TestBasicGeometry(unittest.TestCase):
 
         p = Vector(-3, 0)
         c = Circle(Vector(2, 2), 2)
-        p1, p2 = c.tangent_to_point(p)
+        p1, p2 = c.touching_points_with_tangent(p)
         self.assertTrue(
             (p1 == Vector(0.6206896552, 3.4482758621) and p2 == Vector(2, 0))
             or (p1 == Vector(2, 0) and p2 == Vector(0.6206896552, 3.4482758621))

@@ -405,7 +405,7 @@ class Polygon:
             bottom = min(bottom, (b - a).ccw(c - b))
         return not (top == 1 and bottom == -1)
 
-    def state_point(self, p: Vector) -> int:
+    def side_of_point(self, p: Vector) -> int:
         """多角形と点の位置関係を判定. O(self.n)
 
         Args:
@@ -520,11 +520,11 @@ class Polygon:
         points = []
 
         for p in ch_self.points:
-            if ch_other.state_point(p) == 1:
+            if ch_other.side_of_point(p) == 1:
                 points.append(p)
 
         for p in ch_other.points:
-            if ch_self.state_point(p) == 1:
+            if ch_self.side_of_point(p) == 1:
                 points.append(p)
 
         for i in range(ch_self.n):
@@ -539,7 +539,7 @@ class Polygon:
         polygon = Polygon(points)
         return polygon.convex_hull()
 
-    def convex_cut_line(self, other: Line) -> "Polygon":
+    def convex_cut_with_line(self, other: Line) -> "Polygon":
         """凸多角形を直線で切断. O(self.n)
 
         Args:
@@ -573,14 +573,14 @@ class Polygon:
         for i in range(self.n):
             points.append(self.points[i])
             seg = Segment(self.points[i], self.points[(i + 1) % self.n])
-            for p in other.crossing_points_line(seg):
+            for p in other.crossing_points_with_line(seg):
                 if seg.is_including_point(p) and p != seg.p1 and p != seg.p2:
                     points.append(p)
         for i in range(len(points)):
             seg = Segment(points[i], points[(i + 1) % len(points)])
             dot = (seg.p1 - other.center).dot(seg.p2 - other.center)
             cross = (seg.p1 - other.center).cross(seg.p2 - other.center)
-            if other.state_point(seg.p1) == -1 or other.state_point(seg.p2) == -1:
+            if other.side_of_point(seg.p1) == -1 or other.side_of_point(seg.p2) == -1:
                 theta = atan2(cross, dot)
                 area += other.radius**2 * theta / 2
             else:
@@ -608,7 +608,7 @@ class Circle:
         """
         return pi * self.radius**2
 
-    def state_point(self, p: Vector) -> int:
+    def side_of_point(self, p: Vector) -> int:
         """円と点の位置関係を判定.
 
         Args:
@@ -622,8 +622,8 @@ class Circle:
             return 0
         return 1 if dist < self.radius else -1
 
-    def state_touching_circle(self, other: "Circle") -> int:
-        """円が接しているかどうかを判定
+    def side_of_touching_circle(self, other: "Circle") -> int:
+        """円が接している側を判定
 
         Args:
             other (Circle): もう片方の円
@@ -638,16 +638,16 @@ class Circle:
         else:
             return 0
 
-    def state_including_circle(self, other: "Circle") -> int:
+    def side_of_aparting_circle(self, other: "Circle") -> int:
         """円同士の関係を判定
 
         Args:
             other (Circle): もう片方の円
 
         Returns:
-            int: 1: 内部, 0: 交点を持つ, -1: 外部
+            int: 1: 内部, 0: 交点を1つ以上持つ, -1: 外部
         """
-        if self.state_touching_circle(other):
+        if self.side_of_touching_circle(other):
             return 0
         elif abs(self.center - other.center) < abs(self.radius - other.radius):
             return 1
@@ -656,7 +656,7 @@ class Circle:
         else:
             return 0
 
-    def crossing_points_circle(self, other: "Circle") -> list[Vector]:
+    def crossing_points_with_circle(self, other: "Circle") -> list[Vector]:
         """円と円の交点
 
         Args:
@@ -665,16 +665,16 @@ class Circle:
         Returns:
             list[Vector]: 0~2個の交点を含むリスト
         """
-        if self.state_touching_circle(other) == 1:
+        if self.side_of_touching_circle(other) == 1:
             unit = (other.center - self.center).unit_vector()
             if self.radius > other.radius:
                 return [self.center + unit * self.radius]
             else:
                 return [other.center - unit * other.radius]
-        elif self.state_touching_circle(other) == -1:
+        elif self.side_of_touching_circle(other) == -1:
             unit = (other.center - self.center).unit_vector()
             return [self.center + unit * self.radius]
-        elif self.state_including_circle(other) == 0:
+        elif self.side_of_aparting_circle(other) == 0:
             dist = abs(self.center - other.center)
             cosine = (self.radius**2 - other.radius**2 + dist**2) / (2 * dist)
             h = (self.radius**2 - cosine**2) ** 0.5
@@ -702,13 +702,13 @@ class Circle:
             other (Segment): 対象の直線
 
         Returns:
-            bool: True: 交わる, False: 交わらない
+            bool: True: 1点以上で交わる, False: 交わらない
         """
         if self.is_touching_line(other):
             return True
         return other.distance_to_point(self.center) < self.radius
 
-    def crossing_points_line(self, other: Line) -> list[Vector]:
+    def crossing_points_with_line(self, other: Line) -> list[Vector]:
         """直線と円の交点
 
         Args:
@@ -748,17 +748,17 @@ class Circle:
             float: 共通部分の面積
         """
         if (
-            self.state_including_circle(other) == 1
-            or self.state_touching_circle(other) == 1
+            self.side_of_aparting_circle(other) == 1
+            or self.side_of_touching_circle(other) == 1
         ):
             return min(self.area(), other.area())
         elif (
-            self.state_including_circle(other) == -1
-            or self.state_touching_circle(other) == -1
+            self.side_of_aparting_circle(other) == -1
+            or self.side_of_touching_circle(other) == -1
         ):
             return 0
         else:
-            p1, p2 = self.crossing_points_circle(other)
+            p1, p2 = self.crossing_points_with_circle(other)
             theta1 = atan2(
                 (p1 - self.center).cross(other.center - self.center),
                 (p1 - self.center).dot(other.center - self.center),
@@ -773,7 +773,7 @@ class Circle:
             tri2 = (p2 - other.center).cross(p1 - other.center) / 2
             return arc1 + arc2 + tri1 + tri2
 
-    def tangent_to_point(self, other: Vector) -> list[Vector]:
+    def touching_points_with_tangent(self, other: Vector) -> list[Vector]:
         """other を通る接線の接点
 
         Args:
@@ -782,13 +782,13 @@ class Circle:
         Returns:
             list[Vector]: 接点のリスト
         """
-        if self.state_point(other) == 1:
+        if self.side_of_point(other) == 1:
             return []
-        elif self.state_point(other) == 0:
+        elif self.side_of_point(other) == 0:
             return [other.copy()]
         else:
             radius = (abs(other - self.center) ** 2 - self.radius**2) ** 0.5
-            return self.crossing_points_circle(Circle(other, radius))
+            return self.crossing_points_with_circle(Circle(other, radius))
 
 
 class PillowManager:
