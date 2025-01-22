@@ -5,7 +5,7 @@ elif [ $1 = "f" ]; then
     pypy3 answer.py < input.txt > output.txt
 elif [ $1 = "m" ]; then
     # use file readline
-    pypy3 unit.py
+    pypy3 randomtest.py
 else
     echo "Usage: sh test.sh [m]"
 fi
