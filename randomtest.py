@@ -2,6 +2,7 @@ from answer import check, main
 from honesty import honesty
 from generator import Generator
 import unittest
+from tqdm import tqdm
 
 
 LOOP = 100
@@ -19,7 +20,7 @@ class Test(unittest.TestCase):
 
     def _test_multiple_cases(self):
         gen = Generator()
-        for _ in range(LOOP):
+        for _ in tqdm(range(LOOP)):
             info = gen.generate()
             file = open("input.txt", "r")
             ans = main(lambda: file.readline().rstrip())
