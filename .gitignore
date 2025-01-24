@@ -1,6 +1,7 @@
 .DS_Store
 submit.py
 input.txt
+output.txt
 /in/**
 /out/**
 /ac-library
