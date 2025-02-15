@@ -1,0 +1,7 @@
+services:
+  usatyo-env:
+    build: ./
+    volumes:
+      - ./:/work
+    stdin_open: true
+    tty: true
