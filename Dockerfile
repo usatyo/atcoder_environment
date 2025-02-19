@@ -4,6 +4,7 @@ USER root
 
 ENV TZ=Asia/Tokyo
 ENV DEBIAN_FRONTEND=noninteractive
+SHELL ["/bin/bash", "-c"]
 
 # common
 RUN apt-get update && \
@@ -31,3 +32,7 @@ RUN pip install Pillow
 
 COPY . /work
 WORKDIR /work
+
+# bash setting
+RUN apt-get install bash-completion
+RUN source /etc/bash_completion

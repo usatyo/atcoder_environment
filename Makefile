@@ -8,12 +8,16 @@ build: ## イメージを構築
 .PHONY: start
 start: ## コンテナを構築 & コンテナに入る
 	@docker compose up -d
-	@docker compose exec usatyo-env /bin/bash
+	@docker compose exec usatyo-env /bin/bash -login
 
-.PHONY: test
-test: ## テスト実行
+.PHONY: cpp-test
+cpp-test: ## テスト実行
 	@g++ answer.cpp -std=c++20 -o answer.out
 	@./answer.out < input.txt
+
+.PHONY: py-test
+py-test: ## テスト実行
+	@pypy3 answer.py < input.txt
 
 .PHONY: down
 down: ## コンテナ停止
