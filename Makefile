@@ -12,8 +12,8 @@ start: ## コンテナを構築 & コンテナに入る
 
 .PHONY: test
 test: ## テスト実行
-	@g++ answer.cpp -o answer
-	@./answer < input.txt
+	@g++ answer.cpp -std=c++20 -o answer.out
+	@./answer.out < input.txt
 
 .PHONY: down
 down: ## コンテナ停止

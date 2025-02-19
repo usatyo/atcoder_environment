@@ -6,26 +6,28 @@ ENV TZ=Asia/Tokyo
 ENV DEBIAN_FRONTEND=noninteractive
 
 # common
-RUN apt-get update
-RUN apt-get install -y time
-RUN apt-get install -y tzdata
-RUN apt-get install -y tree
-RUN apt-get install -y git
-RUN apt-get install -y curl
+RUN apt-get update && \
+    apt-get install -y time tzdata tree git curl
 
-# c++
-RUN apt-get install -y build-essential
-RUN apt-get install -y g++-11
+# language
+RUN apt-get update && \
+    apt-get install -y build-essential gcc-12 g++-12 python3.10 python3-pip pypy3
+
+RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-12 30 && \
+    update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-12 30 && \
+    update-alternatives --install /usr/bin/python python /usr/bin/python3.10 30 && \
+    update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 30 && \
+    update-alternatives --install /usr/bin/pypy pypy /usr/bin/pypy3 30
+
+# c++ setting
 RUN git clone https://github.com/atcoder/ac-library.git /lib/ac-library
 ENV CPLUS_INCLUDE_PATH=/lib/ac-library
-ENV CXX=g++-11
+ENV CXX=g++-12
 
-# python
-RUN apt-get install -y python3.11 python3-pip pypy3
-
-# 参照先の変更
-RUN update-alternatives --install /usr/bin/python python /usr/bin/python3.11 30
-RUN update-alternatives --install /usr/bin/pypy pypy /usr/bin/pypy3 30
+# python setting
+RUN pip install git+https://github.com/not522/ac-library-python
+RUN pypy3 -m pip install git+https://github.com/not522/ac-library-python
+RUN pip install Pillow
 
 COPY . /work
 WORKDIR /work
