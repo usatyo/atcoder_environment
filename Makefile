@@ -12,12 +12,21 @@ start: ## コンテナを構築 & コンテナに入る
 
 .PHONY: cpp-test
 cpp-test: ## テスト実行
-	@g++ answer.cpp -std=c++20 -o answer.out
-	@./answer.out < input.txt
+	@g++ ./cpp/answer.cpp -std=c++20 -o ./generated/answer.out
+	@./generated/answer.out < ./texts/input.txt
 
 .PHONY: py-test
 py-test: ## テスト実行
-	@pypy3 answer.py < input.txt
+	@pypy3 ./python/answer.py < ./texts/input.txt
+
+.PHONY: py-profile
+py-profile: ## 実行時間計測（python）
+	@pypy3 -m cProfile ./python/answer.py < ./texts/input.txt
+
+.PHONY: heuristic-test
+heuristic-test: ## テスト実行
+	@g++ ./cpp/heuristic.cpp -std=c++20 -o ./generated/heuristic.out
+	@./generated/heuristic.out < ./texts/input.txt
 
 .PHONY: down
 down: ## コンテナ停止

@@ -11,7 +11,7 @@ class Test(unittest.TestCase):
     def _test_single_case(self):
         gen = Generator()
         gen.generate()
-        file = open("input.txt", "r")
+        file = open("./texts/input.txt", "r")
         ans = main(lambda: file.readline().rstrip())
         file.close()
         honest = honesty()
@@ -21,7 +21,7 @@ class Test(unittest.TestCase):
         gen = Generator()
         for _ in tqdm(range(LOOP)):
             info = gen.generate()
-            file = open("input.txt", "r")
+            file = open("./texts/input.txt", "r")
             ans = main(lambda: file.readline().rstrip())
             file.close()
             honest = honesty()

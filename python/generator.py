@@ -3,7 +3,7 @@ from random import choice, randint, random, shuffle
 
 class Generator:
     def generate(self):
-        self.file = open("input.txt", "w")
+        self.file = open("./texts/input.txt", "w")
         info = self._make_sample()
         self.file.close()
         return info

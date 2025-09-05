@@ -3,7 +3,9 @@ from typing import Callable
 
 
 def main(input: Callable[[], str]):
-    pass
+    n = int(input())
+    ans = n + 1
+    return ans
 
 
 if __name__ == "__main__":

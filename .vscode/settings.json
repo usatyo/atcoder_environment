@@ -18,12 +18,11 @@
     "editor.formatOnSave": true,
     "editor.defaultFormatter": "ms-vscode.cpptools"
   },
-  "code-runner.executorMap": {
-    "cpp": "cd $dir && g++ -std=c++17 -I ./ac-library -DLOCAL $fileName -o main.out && ./main.out < input.txt && ./main.out < input.txt > output_cpp.txt",
-    "python": "cd $dir && python3 $fileName < input.txt && python3 $fileName < input.txt > output_py.txt"
-  },
   "files.associations": {
     "*.css": "tailwindcss",
-    "algorithm": "cpp"
+    "algorithm": "cpp",
+    "regex": "cpp",
+    "sstream": "cpp",
+    "vector": "cpp"
   }
 }
