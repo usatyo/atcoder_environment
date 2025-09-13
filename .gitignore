@@ -8,3 +8,4 @@ __pycache__/
 /usatyo-geometry
 /generated/**
 /texts/**
+/cpp/atcoder/**

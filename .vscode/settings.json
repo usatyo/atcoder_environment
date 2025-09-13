@@ -23,6 +23,10 @@
     "algorithm": "cpp",
     "regex": "cpp",
     "sstream": "cpp",
-    "vector": "cpp"
+    "vector": "cpp",
+    "all": "cpp",
+    "lazysegtree": "cpp",
+    "dsu": "cpp",
+    "stdexcept": "cpp"
   }
 }

@@ -58,6 +58,5 @@ mint comb(int n, int k) {
 }
 
 int main() {
-  cout << 1 << endl;
   return 0;
 }

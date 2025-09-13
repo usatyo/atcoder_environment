@@ -22,7 +22,7 @@ RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-12 30 && \
 
 # c++ setting
 RUN git clone https://github.com/atcoder/ac-library.git /lib/ac-library
-ENV CPLUS_INCLUDE_PATH=/lib/ac-library
+ENV CPLUS_INCLUDE_PATH=/cpp/atcoder
 ENV CXX=g++-12
 
 # python setting
