@@ -32,8 +32,7 @@ Output solve_greedy(const Input& input) {
 	return Output();
 }
 
-/// @brief
-/// 配達先の訪問順序を焼きなまし法で改善する関数（この関数を実装していきます）
+/// @brief 焼きなまし法で解を改善する関数
 /// @param input 入力データ
 /// @param output_greedy 貪欲法で求めた出力データ
 /// @return 出力データ
@@ -104,10 +103,10 @@ Output solve_simulated_annealing(const Input& input,
 							  pow(end_temperature, progress);
 	}
 
-	// 試行回数と合計距離を標準エラー出力に出力
+	// 試行回数と現在のスコアを標準エラー出力に出力
 	cerr << "--- Result ---" << endl;
 	cerr << "iteration     : " << iteration << endl;
-	cerr << "curret score: " << current_score << endl;
+	cerr << "current score: " << current_score << endl;
 
 	return Output();
 }
